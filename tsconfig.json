@@ -20,6 +20,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", ".eslintrc.cjs", "package.json"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src", ".eslintrc.cjs", "package.json", "tailwind.config.js", "postcss.config.js"],
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "baseUrl": ".",
+  "paths": {
+    "@translate-voice/*": ["src/*"]
+  }
 }

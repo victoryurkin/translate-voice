@@ -49,5 +49,6 @@ module.exports = {
     ],
     '@typescript-eslint/no-non-null-assertion': 'off',
     "react/react-in-jsx-scope": "off",
+    "semi": ["error", "always"],
   },
-}
+};
