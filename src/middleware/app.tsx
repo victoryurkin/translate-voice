@@ -1,7 +1,9 @@
+import { Router } from '../pages/router';
+
 const App = () => {
   return (
     <div className="h-full">
-    App
+      <Router />
     </div>
   );
 };

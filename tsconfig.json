@@ -18,12 +18,13 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "allowJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "@translate-voice/*": ["src/*"]
+    }  
   },
-  "include": ["src", ".eslintrc.cjs", "package.json", "tailwind.config.js", "postcss.config.js"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }],
-  "baseUrl": ".",
-  "paths": {
-    "@translate-voice/*": ["src/*"]
-  }
 }
