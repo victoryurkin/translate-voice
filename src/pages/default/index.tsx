@@ -1,3 +1,3 @@
 export const Default = () => {
-  return <div>Default</div>;
+  return <div className="text-primary-700">Default</div>;
 };

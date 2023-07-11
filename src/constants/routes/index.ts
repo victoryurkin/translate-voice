@@ -5,4 +5,7 @@ export const routes = {
   PROFILE: {
     path: '/profile',
   },
+  AUTH: {
+    path: '/auth',
+  },
 };

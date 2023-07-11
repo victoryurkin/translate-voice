@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './middleware/app.tsx';
+import '@translate-voice/design-tokens';
 import './index.css';
 
 import { Amplify } from 'aws-amplify';

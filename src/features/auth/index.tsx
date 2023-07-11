@@ -1,1 +1,5 @@
-export * from './login';
+import { Login } from './login';
+
+export const Auth = () => {
+  return <Login />;
+};
