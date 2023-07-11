@@ -1,11 +1,14 @@
 import { FC, useState, useEffect } from 'react';
 import cx from 'classnames';
+import { useTranslation } from '@translate-voice/i18n';
 import { UserIcon } from '@heroicons/react/24/solid';
 import { Input, Button } from '@translate-voice/components';
 
 export const Login: FC = () => {
   const [isLoaded, setLoaded] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     setTimeout(() => {
@@ -51,24 +54,34 @@ export const Login: FC = () => {
           <div className="flex justify-center py-3xl px-lg">
             <form className="flex-1 max-w-xs md:max-w-md">
               <div className="mb-lg">
-                <Input label="Email" type="email" id="email" placeholder="Email" />
+                <Input
+                  label={t('login.email')}
+                  type="email"
+                  id="email"
+                  placeholder={t('login.email')}
+                />
               </div>
               <div className="mb-4xl">
-                <Input label="Password" type="password" id="password" placeholder="Password" />
+                <Input
+                  label={t('login.password')}
+                  type="password"
+                  id="password"
+                  placeholder={t('login.password')}
+                />
               </div>
               <div className="text-center mb-lg">
-                <Button className="w-full">Log In</Button>
+                <Button className="w-full">{t('login.log_in')}</Button>
               </div>
               <div className="text-center">
                 <Button className="w-full" type="link">
-                  Forgot password?
+                  {t('login.forgot_password')}
                 </Button>
               </div>
             </form>
           </div>
         </div>
       </div>
-      <button className={bottomBarClasses}>Create an account</button>
+      <button className={bottomBarClasses}>{t('login.create_account')}</button>
     </div>
   );
 };
