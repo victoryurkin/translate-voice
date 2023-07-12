@@ -1,3 +1,12 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 export const Default = () => {
-  return <div className="text-primary-700">Default</div>;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate('/auth');
+  }, []);
+
+  return null;
 };

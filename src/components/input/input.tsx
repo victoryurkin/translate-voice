@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import cx from 'classnames';
 import { twMerge } from 'tailwind-merge';
+import { browserName } from 'react-device-detect';
 import { DefaultProps } from '../common/types';
 
 interface InputProps extends DefaultProps {
@@ -25,7 +26,10 @@ export const Input: FC<InputProps> = ({
     'focus:ring-1 focus:ring-inset focus:ring-blue-300 ': true,
     'focus:outline-0': true,
     'shadow-sm transition-all focus:shadow-[0px_0px_10px_2px] focus:shadow-blue-200': true,
+    'border-1': browserName === 'Safari',
+    'border-2': browserName === 'WebKit' || browserName === 'Mobile Safari',
   });
+
   const finalClasses = twMerge(baseClass, className);
 
   return (
