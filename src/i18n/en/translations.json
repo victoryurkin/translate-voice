@@ -15,5 +15,9 @@
     "passwords_dont_match": "Passwords do not match",
     "password_error": "Minimum 6 chars, at least 1 number and 1 capital letter"
   },
-  "generic_error": "Something went wrong. Please, try again later."
+  "generic_error": "Something went wrong. Please, try again later.",
+  "translate": {
+    "swipe": "swipe",
+    "hold": "hold"
+  }
 }

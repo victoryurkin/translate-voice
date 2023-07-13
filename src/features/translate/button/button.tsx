@@ -1,6 +1,7 @@
 import { FC, useEffect, useState, useRef, SyntheticEvent } from 'react';
 import cx from 'classnames';
 import { MoonLoader } from 'react-spinners';
+import { MicrophoneIcon } from '@heroicons/react/24/solid';
 
 interface ButtonProps {
   isLoading?: boolean;
@@ -138,6 +139,7 @@ export const Button: FC<ButtonProps> = ({
           onMouseUp={handleEndMove}
           onTouchEnd={handleEndMove}>
           {isLoading && <MoonLoader className="opacity-70" color="white" />}
+          {!isLoading && <MicrophoneIcon className="w-20 h-20 fill-primary-100" />}
         </div>
       )}
       {isDisabled && (

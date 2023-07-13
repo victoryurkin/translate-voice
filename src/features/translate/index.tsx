@@ -3,10 +3,11 @@ import cx from 'classnames';
 // import { Recorder } from './recorder/recorder';
 import { Button } from './button/button';
 import { FlagUsa, FlagSpain } from '@translate-voice/assets';
-import { translate, speech } from '@translate-voice/services';
+import { transcribe, translate, speech } from '@translate-voice/services';
 import { registerPlugin } from '@capacitor/core';
 import { useRecorder } from './recorder/recorder';
 import { PulseLoader } from 'react-spinners';
+import { useTranslation } from '@translate-voice/i18n';
 
 //#region iOS Capacitor Plugin
 export interface PlayerIosPlugin {
@@ -23,6 +24,7 @@ export const Translate: FC = () => {
   const [activeBar, setActiveBar] = useState<string>('none');
 
   const { startRecording, stopRecording } = useRecorder();
+  const { t } = useTranslation();
 
   useEffect(() => {
     setTimeout(() => {
@@ -73,18 +75,20 @@ export const Translate: FC = () => {
     setLoading(true);
     try {
       const recording = await stopRecording();
+      const sourceText = await transcribe(recording, activeBar === 'top' ? 'en-US' : 'es-US');
+
       if (activeBar === 'top') {
-        setTopText(recording);
+        setTopText(sourceText);
       } else {
-        setBottomText(recording);
+        setBottomText(sourceText);
       }
 
       let translateResponse = '';
       if (activeBar === 'top') {
-        translateResponse = await translate(recording, 'en', 'es');
+        translateResponse = await translate(sourceText, 'en', 'es');
         setBottomText(translateResponse);
       } else {
-        translateResponse = await translate(recording, 'es', 'en');
+        translateResponse = await translate(sourceText, 'es', 'en');
         setTopText(translateResponse);
       }
 
@@ -98,6 +102,7 @@ export const Translate: FC = () => {
     } catch (error) {
       console.log(error);
     } finally {
+      setActiveBar('none');
       setLoading(false);
     }
   };
@@ -108,6 +113,7 @@ export const Translate: FC = () => {
         <div className="rounded-full overflow-hidden w-16 h-16 mx-auto mt-14 border shadow-lg">
           <FlagUsa className="h-16 fill-white" />
         </div>
+        <p className="text-center text-secondary-400">en-us</p>
       </div>
       <div className={mainContainerClasses}>
         <div className={topContainerClasses}>
@@ -121,7 +127,9 @@ export const Translate: FC = () => {
               <PulseLoader color="#cccccc" />
             </div>
           )}
-          <div className="pt-36 px-xl text-secondary-600 text-center">{topText}</div>
+          <div className="pt-40 px-xl text-secondary-600 text-center h-full pb-40">
+            <div className="h-full overflow-y-auto flex items-center justify-center">{topText}</div>
+          </div>
         </div>
         <div className="flex justify-center h-10 -mt-6 bg-white">
           <div className="absolute -translate-y-32">
@@ -130,18 +138,27 @@ export const Translate: FC = () => {
               isDisabled={isLoading}
               onUpStart={() => {
                 setActiveBar('top');
-                startRecording('en-US');
+                startRecording();
                 setTopText(undefined);
                 setBottomText(undefined);
               }}
               onDownStart={() => {
                 setActiveBar('bottom');
-                startRecording('es-US');
+                startRecording();
                 setTopText(undefined);
                 setBottomText(undefined);
               }}
               onEnd={onEnd}
             />
+          </div>
+          <div className="text-left flex-1 flex items-center uppercase text-secondary-400">
+            <p className="flex-1 text-right pr-lg">
+              {t('translate.swipe')} {'>'}
+            </p>
+            <div className="w-40"></div>
+            <p className="flex-1 pl-lg">
+              {'<'} {t('translate.hold')}
+            </p>
           </div>
         </div>
         <div className={bottomContainerClasses}>
@@ -155,11 +172,16 @@ export const Translate: FC = () => {
               <PulseLoader color="#cccccc" />
             </div>
           )}
-          <div className="pt-36 px-xl text-secondary-600 text-center">{bottomText}</div>
+          <div className="pt-36 px-xl text-secondary-600 text-center h-full pb-40">
+            <div className="h-full overflow-y-auto flex items-center justify-center">
+              {bottomText}
+            </div>
+          </div>
         </div>
       </div>
       <div className={bottomBarClasses}>
-        <div className="rounded-full overflow-hidden w-16 h-16 mx-auto -mt-8 border shadow-lg">
+        <p className="text-center text-secondary-400 -mt-12">es-us</p>
+        <div className="rounded-full overflow-hidden w-16 h-16 mx-auto border shadow-lg">
           <FlagSpain className="h-16 fill-white" />
         </div>
       </div>
