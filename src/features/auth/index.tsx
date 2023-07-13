@@ -1,6 +1,8 @@
 import { FC, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import cx from 'classnames';
 import { useTranslation } from '@translate-voice/i18n';
+import { routes } from '@translate-voice/constants';
 import { Signin } from './signin/signin';
 import { Signup } from './signup';
 import { ForgotPassword } from './forgot-password';
@@ -18,6 +20,7 @@ export const Auth: FC = () => {
   const [virtualRoute, setVirtualRoute] = useState<VirtualRoutes>(VirtualRoutes.SIGN_IN);
 
   const { t } = useTranslation();
+  const navigateToRoute = useNavigate();
 
   useEffect(() => {
     setTimeout(() => {
@@ -68,7 +71,10 @@ export const Auth: FC = () => {
         <div className={topBarClasses} />
         <div className={routerClasses}>
           {virtualRoute === VirtualRoutes.SIGN_IN && (
-            <Signin onForgotPassword={() => navigate(VirtualRoutes.FORGOT_PASSWORD)} />
+            <Signin
+              onForgotPassword={() => navigate(VirtualRoutes.FORGOT_PASSWORD)}
+              onSuccess={() => navigateToRoute(routes.TRANSLATE.path)}
+            />
           )}
           {virtualRoute === VirtualRoutes.SIGN_UP && <Signup />}
           {virtualRoute === VirtualRoutes.FORGOT_PASSWORD && <ForgotPassword />}
