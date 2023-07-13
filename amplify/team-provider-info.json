@@ -17,6 +17,10 @@
       },
       "hosting": {
         "S3AndCloudFront": {}
+      },
+      "predictions": {
+        "translateTexte69ae279": {},
+        "speechGenerator627a9eb9": {}
       }
     }
   }

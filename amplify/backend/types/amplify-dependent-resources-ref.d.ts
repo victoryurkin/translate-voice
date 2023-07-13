@@ -21,5 +21,17 @@ export type AmplifyDependentResourcesAttributes = {
       "S3BucketSecureURL": "string",
       "WebsiteURL": "string"
     }
+  },
+  "predictions": {
+    "speechGenerator627a9eb9": {
+      "language": "string",
+      "region": "string",
+      "voice": "string"
+    },
+    "translateTexte69ae279": {
+      "region": "string",
+      "sourceLang": "string",
+      "targetLang": "string"
+    }
   }
 }

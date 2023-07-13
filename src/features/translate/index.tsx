@@ -2,6 +2,14 @@ import { FC, useEffect, useState } from 'react';
 import cx from 'classnames';
 import { Button } from './button/button';
 import { FlagRussia, FlagUsa } from '@translate-voice/assets';
+import { translate, speech } from '@translate-voice/services';
+import { registerPlugin } from '@capacitor/core';
+
+//#region iOS Capacitor Plugin
+export interface PlayerIosPlugin {
+  play(options: { file: string }): Promise<{ response: string }>;
+}
+const PlayerIos = registerPlugin<PlayerIosPlugin>('PlayerIos');
 
 export const Translate: FC = () => {
   const [isLoaded, setLoaded] = useState(false);
@@ -53,6 +61,18 @@ export const Translate: FC = () => {
     'bg-white': activeBar === 'bottom',
   });
 
+  const onEnd = async () => {
+    try {
+      const translateResponse = await translate();
+      const speechResponse = await speech(translateResponse);
+      await PlayerIos.play({
+        file: speechResponse,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className={containerClasses}>
       <div className={topBarClasses}>
@@ -67,7 +87,7 @@ export const Translate: FC = () => {
             <Button
               onUpStart={() => setActiveBar('top')}
               onDownStart={() => setActiveBar('bottom')}
-              onEnd={() => setActiveBar('none')}
+              onEnd={onEnd}
             />
           </div>
         </div>
