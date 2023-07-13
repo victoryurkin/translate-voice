@@ -3,6 +3,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { resources } from '@translate-voice/i18n';
+import { AuthProvider } from '@translate-voice/context';
 
 i18n
   .use(initReactI18next)
@@ -17,9 +18,11 @@ i18n
 
 const App = () => {
   return (
-    <div className="h-full">
-      <Router />
-    </div>
+    <AuthProvider>
+      <div className="h-full">
+        <Router />
+      </div>
+    </AuthProvider>
   );
 };
 

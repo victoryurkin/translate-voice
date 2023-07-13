@@ -1,9 +1,9 @@
 export const routes = {
-  HOME: {
+  DEFAULT: {
     path: '/',
   },
-  PROFILE: {
-    path: '/profile',
+  TRANSLATE: {
+    path: '/translate',
   },
   AUTH: {
     path: '/auth',

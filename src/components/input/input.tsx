@@ -1,24 +1,13 @@
-import { FC } from 'react';
+import { HTMLProps, forwardRef } from 'react';
 import cx from 'classnames';
 import { twMerge } from 'tailwind-merge';
 import { browserName } from 'react-device-detect';
-import { DefaultProps } from '../common/types';
 
-interface InputProps extends DefaultProps {
-  label?: string;
-  type?: string;
-  placeholder?: string;
+interface Props extends HTMLProps<HTMLInputElement> {
+  error?: string;
 }
 
-export const Input: FC<InputProps> = ({
-  className,
-  id,
-  testId,
-  ariaLabel,
-  type,
-  placeholder,
-  label,
-}) => {
+export const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
   const baseClass = cx({
     'typo-default block w-full rounded-3xl border-0 py-3 px-6 text-gray-900': true,
     'ring-1 ring-inset ring-gray-300': true,
@@ -30,22 +19,13 @@ export const Input: FC<InputProps> = ({
     'border-2': browserName === 'WebKit' || browserName === 'Mobile Safari',
   });
 
-  const finalClasses = twMerge(baseClass, className);
+  const errorClass = cx({
+    'shadow-[0px_0px_10px_2px] shadow-red-300 focus:shadow-red-300': !!props.error,
+  });
 
-  return (
-    <>
-      <label htmlFor={id} className="sr-only">
-        {label}
-      </label>
-      <input
-        className={finalClasses}
-        type={type}
-        name={id}
-        id={id}
-        placeholder={placeholder}
-        data-testid={testId}
-        aria-label={ariaLabel}
-      />
-    </>
-  );
-};
+  const finalClasses = twMerge(baseClass, errorClass, props.className);
+
+  return <input {...props} ref={ref} className={finalClasses} />;
+});
+
+Input.displayName = 'Input';

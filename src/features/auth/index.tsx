@@ -42,7 +42,7 @@ export const Auth: FC = () => {
   });
   const bottomBarClasses = cx({
     'transition-transform duration-500 ease-out': true,
-    'transition-all w-full px-xl h-24 bg-gradient-to-b from-primary-600 to-primary-500 rounded-t-4xl text-white underline active:from-primary-700 active:to-primary-500 focus-visible:outline-0 focus-visible:shadow-[0px_0px_0px_4px] focus-visible:shadow-primary-300':
+    'transition-all w-full px-xl bg-gradient-to-b from-primary-600 to-primary-500 rounded-t-4xl text-white underline active:from-primary-700 active:to-primary-500 focus-visible:outline-0 focus-visible:shadow-[0px_0px_0px_4px] focus-visible:shadow-primary-300':
       true,
     'translate-y-24': !isLoaded,
     'translate-y-0': isLoaded,
@@ -81,10 +81,12 @@ export const Auth: FC = () => {
             virtualRoute === VirtualRoutes.SIGN_IN ? VirtualRoutes.SIGN_UP : VirtualRoutes.SIGN_IN
           )
         }>
-        {virtualRoute === VirtualRoutes.SIGN_IN && t('auth.create_account')}
-        {(virtualRoute === VirtualRoutes.SIGN_UP ||
-          virtualRoute === VirtualRoutes.FORGOT_PASSWORD) &&
-          t('auth.signin_account')}
+        <div className="h-20 p-xl">
+          {virtualRoute === VirtualRoutes.SIGN_IN && t('auth.create_account')}
+          {(virtualRoute === VirtualRoutes.SIGN_UP ||
+            virtualRoute === VirtualRoutes.FORGOT_PASSWORD) &&
+            t('auth.signin_account')}
+        </div>
       </button>
     </div>
   );
