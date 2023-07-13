@@ -26,3 +26,12 @@ export const getAuthUser = async () => {
   }
   return undefined;
 };
+
+export const getAccessToken = async () => {
+  const response = await Auth.currentSession();
+  const idToken = response.getIdToken();
+  if (idToken) {
+    return idToken.getJwtToken();
+  }
+  return undefined;
+};
