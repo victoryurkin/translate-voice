@@ -1,9 +1,12 @@
 import { FC, useEffect, useState } from 'react';
 import cx from 'classnames';
+// import { Recorder } from './recorder/recorder';
 import { Button } from './button/button';
-import { FlagRussia, FlagUsa } from '@translate-voice/assets';
+import { FlagUsa, FlagSpain } from '@translate-voice/assets';
 import { translate, speech } from '@translate-voice/services';
 import { registerPlugin } from '@capacitor/core';
+import { useRecorder } from './recorder/recorder';
+import { PulseLoader } from 'react-spinners';
 
 //#region iOS Capacitor Plugin
 export interface PlayerIosPlugin {
@@ -12,9 +15,14 @@ export interface PlayerIosPlugin {
 const PlayerIos = registerPlugin<PlayerIosPlugin>('PlayerIos');
 
 export const Translate: FC = () => {
+  const [isLoading, setLoading] = useState(false);
+  const [topText, setTopText] = useState<string>();
+  const [bottomText, setBottomText] = useState<string>();
   const [isLoaded, setLoaded] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [activeBar, setActiveBar] = useState<string>('none');
+
+  const { startRecording, stopRecording } = useRecorder();
 
   useEffect(() => {
     setTimeout(() => {
@@ -62,14 +70,35 @@ export const Translate: FC = () => {
   });
 
   const onEnd = async () => {
+    setLoading(true);
     try {
-      const translateResponse = await translate();
-      const speechResponse = await speech(translateResponse);
+      const recording = await stopRecording();
+      if (activeBar === 'top') {
+        setTopText(recording);
+      } else {
+        setBottomText(recording);
+      }
+
+      let translateResponse = '';
+      if (activeBar === 'top') {
+        translateResponse = await translate(recording, 'en', 'es');
+        setBottomText(translateResponse);
+      } else {
+        translateResponse = await translate(recording, 'es', 'en');
+        setTopText(translateResponse);
+      }
+
+      const speechResponse = await speech(
+        translateResponse,
+        activeBar === 'top' ? 'Miguel' : 'Joey'
+      );
       await PlayerIos.play({
         file: speechResponse,
       });
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -81,21 +110,57 @@ export const Translate: FC = () => {
         </div>
       </div>
       <div className={mainContainerClasses}>
-        <div className={topContainerClasses}></div>
+        <div className={topContainerClasses}>
+          {isLoading && activeBar === 'top' && !topText && (
+            <div className="h-full flex items-center justify-center">
+              <PulseLoader color="#cccccc" />
+            </div>
+          )}
+          {isLoading && activeBar === 'bottom' && bottomText && (
+            <div className="h-full flex items-center justify-center">
+              <PulseLoader color="#cccccc" />
+            </div>
+          )}
+          <div className="pt-36 px-xl text-secondary-600 text-center">{topText}</div>
+        </div>
         <div className="flex justify-center h-10 -mt-6 bg-white">
           <div className="absolute -translate-y-32">
             <Button
-              onUpStart={() => setActiveBar('top')}
-              onDownStart={() => setActiveBar('bottom')}
+              isLoading={isLoading}
+              isDisabled={isLoading}
+              onUpStart={() => {
+                setActiveBar('top');
+                startRecording('en-US');
+                setTopText(undefined);
+                setBottomText(undefined);
+              }}
+              onDownStart={() => {
+                setActiveBar('bottom');
+                startRecording('es-US');
+                setTopText(undefined);
+                setBottomText(undefined);
+              }}
               onEnd={onEnd}
             />
           </div>
         </div>
-        <div className={bottomContainerClasses}></div>
+        <div className={bottomContainerClasses}>
+          {isLoading && activeBar === 'top' && !bottomText && topText && (
+            <div className="h-full flex items-center justify-center">
+              <PulseLoader color="#cccccc" />
+            </div>
+          )}
+          {isLoading && activeBar === 'bottom' && !bottomText && (
+            <div className="h-full flex items-center justify-center">
+              <PulseLoader color="#cccccc" />
+            </div>
+          )}
+          <div className="pt-36 px-xl text-secondary-600 text-center">{bottomText}</div>
+        </div>
       </div>
       <div className={bottomBarClasses}>
         <div className="rounded-full overflow-hidden w-16 h-16 mx-auto -mt-8 border shadow-lg">
-          <FlagRussia className="h-16 fill-white" />
+          <FlagSpain className="h-16 fill-white" />
         </div>
       </div>
     </div>

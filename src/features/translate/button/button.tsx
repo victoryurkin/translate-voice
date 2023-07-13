@@ -1,13 +1,22 @@
 import { FC, useEffect, useState, useRef, SyntheticEvent } from 'react';
 import cx from 'classnames';
+import { MoonLoader } from 'react-spinners';
 
 interface ButtonProps {
+  isLoading?: boolean;
+  isDisabled?: boolean;
   onUpStart?: () => void;
   onDownStart?: () => void;
   onEnd?: () => void;
 }
 
-export const Button: FC<ButtonProps> = ({ onUpStart, onDownStart, onEnd }) => {
+export const Button: FC<ButtonProps> = ({
+  isLoading,
+  isDisabled,
+  onUpStart,
+  onDownStart,
+  onEnd,
+}) => {
   const [buttonPosition, setButtonPosition] = useState<number>();
   const isMoving = useRef<boolean>();
   const startMove = useRef<(e: unknown) => void>();
@@ -111,7 +120,7 @@ export const Button: FC<ButtonProps> = ({ onUpStart, onDownStart, onEnd }) => {
   }, [buttonPositionChange.current]);
 
   const buttonClasses = cx(
-    'w-40 h-40 rounded-full bg-primary-500',
+    'w-40 h-40 rounded-full bg-primary-500 flex items-center justify-center',
     'transition-transform duration-300 ease-out',
     {
       'bg-primary-700': isMoving.current,
@@ -120,14 +129,24 @@ export const Button: FC<ButtonProps> = ({ onUpStart, onDownStart, onEnd }) => {
 
   return (
     <div className="rounded-full w-40 h-72 bg-secondary-300 flex items-center justify-center shadow-inner">
-      <div
-        style={{ transform: `translateY(${buttonPosition}px)` }}
-        className={buttonClasses}
-        onMouseDown={handleStartMove}
-        onTouchStart={handleStartMove}
-        onMouseUp={handleEndMove}
-        onTouchEnd={handleEndMove}
-      />
+      {!isDisabled && (
+        <div
+          style={{ transform: `translateY(${buttonPosition}px)` }}
+          className={buttonClasses}
+          onMouseDown={handleStartMove}
+          onTouchStart={handleStartMove}
+          onMouseUp={handleEndMove}
+          onTouchEnd={handleEndMove}>
+          {isLoading && <MoonLoader className="opacity-70" color="white" />}
+        </div>
+      )}
+      {isDisabled && (
+        <div
+          style={{ transform: `translateY(${buttonPosition}px)`, opacity: '0.7' }}
+          className={buttonClasses}>
+          {isLoading && <MoonLoader className="opacity-70" color="white" />}
+        </div>
+      )}
     </div>
   );
 };

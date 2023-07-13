@@ -1,13 +1,13 @@
 import { Predictions } from '@aws-amplify/predictions';
 import { Buffer } from 'buffer';
 
-export const speech = async (text: string) => {
+export const speech = async (text: string, voice: string) => {
   const response = await Predictions.convert({
     textToSpeech: {
       source: {
         text: text,
       },
-      voiceId: 'Tatyana', // default configured on aws-exports.js
+      voiceId: voice, // default configured on aws-exports.js
       // list of different options are here https://docs.aws.amazon.com/polly/latest/dg/voicelist.html
     },
   });
