@@ -39,6 +39,11 @@
       "providerPlugin": "awscloudformation",
       "service": "Polly"
     },
+    "transcription9c3756bc": {
+      "convertType": "transcription",
+      "providerPlugin": "awscloudformation",
+      "service": "Transcribe"
+    },
     "translateTexte69ae279": {
       "convertType": "translateText",
       "providerPlugin": "awscloudformation",

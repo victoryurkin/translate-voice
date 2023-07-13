@@ -28,6 +28,10 @@ export type AmplifyDependentResourcesAttributes = {
       "region": "string",
       "voice": "string"
     },
+    "transcription9c3756bc": {
+      "language": "string",
+      "region": "string"
+    },
     "translateTexte69ae279": {
       "region": "string",
       "sourceLang": "string",
