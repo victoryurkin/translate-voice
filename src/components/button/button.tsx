@@ -6,6 +6,7 @@ import { DefaultProps } from '../common/types';
 interface ButtonProps extends DefaultProps {
   type?: 'primary' | 'default' | 'link';
   htmlType?: 'button' | 'submit' | 'reset';
+  onClick?: () => void;
 }
 
 export const Button: FC<ButtonProps> = ({
@@ -16,6 +17,7 @@ export const Button: FC<ButtonProps> = ({
   type = 'primary',
   htmlType = 'button',
   children,
+  onClick,
 }) => {
   const baseClass = cx({
     'rounded-3xl px-8 py-3 typo-default shadow-sm': true,
@@ -37,7 +39,8 @@ export const Button: FC<ButtonProps> = ({
       className={finalClasses}
       id={id}
       data-testid={testId}
-      aria-label={ariaLabel}>
+      aria-label={ariaLabel}
+      onClick={onClick}>
       {children}
     </button>
   );

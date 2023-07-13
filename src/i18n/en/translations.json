@@ -1,9 +1,15 @@
 {
-  "login": {
+  "auth": {
     "email": "Email",
     "password": "Password",
-    "log_in": "Log In",
+    "signin": "Sign In",
+    "signup": "Sign Up",
     "forgot_password": "Forgot password?",
-    "create_account": "Create an account"
+    "confirm_password": "Confirm password",
+    "create_account": "Create an account",
+    "signin_account": "Have an account? Sign in",
+    "otp": "Enter one-time code",
+    "confirm_code": "Confirm Code",
+    "resend_otp": "Resend OTP"
   }
 }
