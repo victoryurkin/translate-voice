@@ -3,7 +3,7 @@ import cx from 'classnames';
 // import { Recorder } from './recorder/recorder';
 import { Button } from './button/button';
 import { FlagUsa, FlagSpain } from '@translate-voice/assets';
-import { transcribe, translate, speech } from '@translate-voice/services';
+import { transcribe, translate, speech, transcribeUpload } from '@translate-voice/services';
 import { registerPlugin } from '@capacitor/core';
 import { useRecorder } from './recorder/recorder';
 import { PulseLoader } from 'react-spinners';
@@ -75,7 +75,9 @@ export const Translate: FC = () => {
     setLoading(true);
     try {
       const recording = await stopRecording();
+
       const sourceText = await transcribe(recording, activeBar === 'top' ? 'en-US' : 'es-US');
+      // const sourceText = await transcribeUpload(recording, 'en-US');
 
       if (activeBar === 'top') {
         setTopText(sourceText);

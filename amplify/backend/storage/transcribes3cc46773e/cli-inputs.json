@@ -1,0 +1,14 @@
+{
+  "resourceName": "transcribes3cc46773e",
+  "policyUUID": "cc46773e",
+  "bucketName": "translatevoiceff707431136c4ae2beb32a6fd3274edd",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}

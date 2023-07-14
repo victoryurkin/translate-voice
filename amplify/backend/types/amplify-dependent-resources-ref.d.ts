@@ -37,5 +37,11 @@ export type AmplifyDependentResourcesAttributes = {
       "sourceLang": "string",
       "targetLang": "string"
     }
+  },
+  "storage": {
+    "transcribes3cc46773e": {
+      "BucketName": "string",
+      "Region": "string"
+    }
   }
 }

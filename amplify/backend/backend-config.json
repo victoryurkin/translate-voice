@@ -49,5 +49,12 @@
       "providerPlugin": "awscloudformation",
       "service": "Translate"
     }
+  },
+  "storage": {
+    "transcribes3cc46773e": {
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "S3"
+    }
   }
 }

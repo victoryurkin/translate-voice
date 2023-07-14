@@ -89,6 +89,7 @@
               "Effect": "Allow",
               "Action": [
                 "transcribe:GetTranscriptionJob",
+                "transcribe:DeleteTranscriptionJob",
                 "transcribe:StartStreamTranscription",
                 "transcribe:StartStreamTranscriptionWebSocket",
                 "transcribe:StartTranscriptionJob"
