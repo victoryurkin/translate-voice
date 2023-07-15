@@ -165,7 +165,7 @@ export const Translate: FC = () => {
             onClick={() => setLanguageSelector('top')}>
             <img src={flags[sourceLanguage.code]} className="h-16" alt={sourceLanguage.code} />
           </div>
-          <p className="text-center text-secondary-400">en-us</p>
+          <p className="text-center text-secondary-400">{sourceLanguage.name}</p>
         </div>
         <div className={mainContainerClasses}>
           <div className={topContainerClasses}>
@@ -234,7 +234,7 @@ export const Translate: FC = () => {
           </div>
         </div>
         <div className={bottomBarClasses}>
-          <p className="text-center text-secondary-400 -mt-12">es-us</p>
+          <p className="text-center text-secondary-400 -mt-12">{targetLanguage.name}</p>
           <div
             className="rounded-full overflow-hidden w-16 h-16 mx-auto border shadow-lg"
             onClick={() => setLanguageSelector('bottom')}>
