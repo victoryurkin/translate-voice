@@ -111,8 +111,8 @@ export const transcribeUpload = async (bytes: Float32Array, language: string): P
       TranscriptionJobName: key,
     });
     const queue = new PullQueue({
-      interval: 500,
-      maxRetries: 30,
+      interval: 1000,
+      maxRetries: 60,
     });
 
     const queueResponse = (await queue.pushJob(async () => {

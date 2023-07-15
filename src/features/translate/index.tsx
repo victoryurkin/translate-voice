@@ -1,13 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useEffect, useState } from 'react';
 import cx from 'classnames';
 // import { Recorder } from './recorder/recorder';
 import { Button } from './button/button';
-import { FlagUsa, FlagSpain } from '@translate-voice/assets';
+import { flags } from '@translate-voice/assets';
 import { transcribe, translate, speech, transcribeUpload } from '@translate-voice/services';
 import { registerPlugin } from '@capacitor/core';
 import { useRecorder } from './recorder/recorder';
 import { PulseLoader } from 'react-spinners';
 import { useTranslation } from '@translate-voice/i18n';
+import { supportedLanguages, Language } from '@translate-voice/constants';
+import { LanguageSelector } from './language-selector/language-selector';
 
 //#region iOS Capacitor Plugin
 export interface PlayerIosPlugin {
@@ -22,6 +25,10 @@ export const Translate: FC = () => {
   const [isLoaded, setLoaded] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [activeBar, setActiveBar] = useState<string>('none');
+  const [sourceLanguage, setSourceLanguage] = useState<Language>(supportedLanguages['en-US']);
+  const [targetLanguage, setTargetLanguage] = useState<Language>(supportedLanguages['ru-RU']);
+  const [preferredVoice] = useState('male');
+  const [languageSelector, setLanguageSelector] = useState<'top' | 'bottom'>();
 
   const { startRecording, stopRecording } = useRecorder();
   const { t } = useTranslation();
@@ -76,8 +83,20 @@ export const Translate: FC = () => {
     try {
       const recording = await stopRecording();
 
-      const sourceText = await transcribe(recording, activeBar === 'top' ? 'en-US' : 'es-US');
-      // const sourceText = await transcribeUpload(recording, 'en-US');
+      let sourceText = '';
+      if (activeBar === 'top') {
+        if (sourceLanguage.streaming) {
+          sourceText = await transcribe(recording, sourceLanguage.code);
+        } else {
+          sourceText = await transcribeUpload(recording, sourceLanguage.code);
+        }
+      } else {
+        if (targetLanguage.streaming) {
+          sourceText = await transcribe(recording, targetLanguage.code);
+        } else {
+          sourceText = await transcribeUpload(recording, targetLanguage.code);
+        }
+      }
 
       if (activeBar === 'top') {
         setTopText(sourceText);
@@ -87,17 +106,38 @@ export const Translate: FC = () => {
 
       let translateResponse = '';
       if (activeBar === 'top') {
-        translateResponse = await translate(sourceText, 'en', 'es');
+        translateResponse = await translate(
+          sourceText,
+          sourceLanguage.translateCode,
+          targetLanguage.translateCode
+        );
         setBottomText(translateResponse);
       } else {
-        translateResponse = await translate(sourceText, 'es', 'en');
+        translateResponse = await translate(
+          sourceText,
+          targetLanguage.translateCode,
+          sourceLanguage.translateCode
+        );
         setTopText(translateResponse);
       }
 
-      const speechResponse = await speech(
-        translateResponse,
-        activeBar === 'top' ? 'Miguel' : 'Joey'
-      );
+      let speechResponse = '';
+      let voice: string;
+      if (activeBar === 'top') {
+        if (targetLanguage.voices[preferredVoice]) {
+          voice = targetLanguage.voices[preferredVoice]!;
+        } else {
+          voice = targetLanguage.voices.male || targetLanguage.voices.female!;
+        }
+      } else {
+        if (sourceLanguage.voices[preferredVoice]) {
+          voice = sourceLanguage.voices[preferredVoice]!;
+        } else {
+          voice = sourceLanguage.voices.male || sourceLanguage.voices.female!;
+        }
+      }
+      speechResponse = await speech(translateResponse, voice);
+
       await PlayerIos.play({
         file: speechResponse,
       });
@@ -109,84 +149,105 @@ export const Translate: FC = () => {
     }
   };
 
+  const selectLanguage = (code: string) => {
+    languageSelector === 'top'
+      ? setSourceLanguage(supportedLanguages[code])
+      : setTargetLanguage(supportedLanguages[code]);
+    setLanguageSelector(undefined);
+  };
+
   return (
-    <div className={containerClasses}>
-      <div className={topBarClasses}>
-        <div className="rounded-full overflow-hidden w-16 h-16 mx-auto mt-14 border shadow-lg">
-          <FlagUsa className="h-16 fill-white" />
+    <>
+      <div className={containerClasses}>
+        <div className={topBarClasses}>
+          <div
+            className="rounded-full overflow-hidden w-16 h-16 mx-auto mt-14 border shadow-lg"
+            onClick={() => setLanguageSelector('top')}>
+            <img src={flags[sourceLanguage.code]} className="h-16" alt={sourceLanguage.code} />
+          </div>
+          <p className="text-center text-secondary-400">en-us</p>
         </div>
-        <p className="text-center text-secondary-400">en-us</p>
+        <div className={mainContainerClasses}>
+          <div className={topContainerClasses}>
+            {isLoading && activeBar === 'top' && !topText && (
+              <div className="h-full flex items-center justify-center">
+                <PulseLoader color="#cccccc" />
+              </div>
+            )}
+            {isLoading && activeBar === 'bottom' && bottomText && (
+              <div className="h-full flex items-center justify-center">
+                <PulseLoader color="#cccccc" />
+              </div>
+            )}
+            <div className="pt-40 px-xl text-secondary-600 text-center h-full pb-40">
+              <div className="h-full overflow-y-auto flex items-center justify-center">
+                {topText}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-center h-10 -mt-6 bg-white">
+            <div className="absolute -translate-y-32">
+              <Button
+                isLoading={isLoading}
+                isDisabled={isLoading}
+                onUpStart={() => {
+                  setActiveBar('top');
+                  startRecording();
+                  setTopText(undefined);
+                  setBottomText(undefined);
+                }}
+                onDownStart={() => {
+                  setActiveBar('bottom');
+                  startRecording();
+                  setTopText(undefined);
+                  setBottomText(undefined);
+                }}
+                onEnd={onEnd}
+              />
+            </div>
+            <div className="text-left flex-1 flex items-center uppercase text-secondary-400">
+              <p className="flex-1 text-right pr-lg">
+                {t('translate.swipe')} {'>'}
+              </p>
+              <div className="w-40"></div>
+              <p className="flex-1 pl-lg">
+                {'<'} {t('translate.hold')}
+              </p>
+            </div>
+          </div>
+          <div className={bottomContainerClasses}>
+            {isLoading && activeBar === 'top' && !bottomText && topText && (
+              <div className="h-full flex items-center justify-center">
+                <PulseLoader color="#cccccc" />
+              </div>
+            )}
+            {isLoading && activeBar === 'bottom' && !bottomText && (
+              <div className="h-full flex items-center justify-center">
+                <PulseLoader color="#cccccc" />
+              </div>
+            )}
+            <div className="pt-36 px-xl text-secondary-600 text-center h-full pb-40">
+              <div className="h-full overflow-y-auto flex items-center justify-center">
+                {bottomText}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className={bottomBarClasses}>
+          <p className="text-center text-secondary-400 -mt-12">es-us</p>
+          <div
+            className="rounded-full overflow-hidden w-16 h-16 mx-auto border shadow-lg"
+            onClick={() => setLanguageSelector('bottom')}>
+            <img src={flags[targetLanguage.code]} className="h-16" alt={targetLanguage.code} />
+          </div>
+        </div>
       </div>
-      <div className={mainContainerClasses}>
-        <div className={topContainerClasses}>
-          {isLoading && activeBar === 'top' && !topText && (
-            <div className="h-full flex items-center justify-center">
-              <PulseLoader color="#cccccc" />
-            </div>
-          )}
-          {isLoading && activeBar === 'bottom' && bottomText && (
-            <div className="h-full flex items-center justify-center">
-              <PulseLoader color="#cccccc" />
-            </div>
-          )}
-          <div className="pt-40 px-xl text-secondary-600 text-center h-full pb-40">
-            <div className="h-full overflow-y-auto flex items-center justify-center">{topText}</div>
-          </div>
-        </div>
-        <div className="flex justify-center h-10 -mt-6 bg-white">
-          <div className="absolute -translate-y-32">
-            <Button
-              isLoading={isLoading}
-              isDisabled={isLoading}
-              onUpStart={() => {
-                setActiveBar('top');
-                startRecording();
-                setTopText(undefined);
-                setBottomText(undefined);
-              }}
-              onDownStart={() => {
-                setActiveBar('bottom');
-                startRecording();
-                setTopText(undefined);
-                setBottomText(undefined);
-              }}
-              onEnd={onEnd}
-            />
-          </div>
-          <div className="text-left flex-1 flex items-center uppercase text-secondary-400">
-            <p className="flex-1 text-right pr-lg">
-              {t('translate.swipe')} {'>'}
-            </p>
-            <div className="w-40"></div>
-            <p className="flex-1 pl-lg">
-              {'<'} {t('translate.hold')}
-            </p>
-          </div>
-        </div>
-        <div className={bottomContainerClasses}>
-          {isLoading && activeBar === 'top' && !bottomText && topText && (
-            <div className="h-full flex items-center justify-center">
-              <PulseLoader color="#cccccc" />
-            </div>
-          )}
-          {isLoading && activeBar === 'bottom' && !bottomText && (
-            <div className="h-full flex items-center justify-center">
-              <PulseLoader color="#cccccc" />
-            </div>
-          )}
-          <div className="pt-36 px-xl text-secondary-600 text-center h-full pb-40">
-            <div className="h-full overflow-y-auto flex items-center justify-center">
-              {bottomText}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className={bottomBarClasses}>
-        <p className="text-center text-secondary-400 -mt-12">es-us</p>
-        <div className="rounded-full overflow-hidden w-16 h-16 mx-auto border shadow-lg">
-          <FlagSpain className="h-16 fill-white" />
-        </div>
-      </div>
-    </div>
+      <LanguageSelector
+        languageSelector={languageSelector}
+        selectedLanguage={languageSelector === 'top' ? sourceLanguage.code : targetLanguage.code}
+        onClose={() => setLanguageSelector(undefined)}
+        onSelect={selectLanguage}
+      />
+    </>
   );
 };
