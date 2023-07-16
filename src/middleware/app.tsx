@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import Auth from './auth';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
@@ -6,6 +7,16 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import { resources } from '@translate-voice/i18n';
 import { AuthProvider } from '@translate-voice/context';
 import { registerPlugin } from '@capacitor/core';
+
+import { initializeApp } from 'firebase/app';
+import { getAuth, indexedDBLocalPersistence, initializeAuth } from 'firebase/auth';
+import { firebaseConfig } from '../firebase-exports.ts';
+
+const app = initializeApp(firebaseConfig);
+
+const auth = Capacitor.isNativePlatform()
+  ? initializeAuth(app, { persistence: indexedDBLocalPersistence })
+  : getAuth(app);
 
 i18n
   .use(initReactI18next)
@@ -34,7 +45,7 @@ const App = () => {
     checkPermissions();
   }, []);
   return (
-    <AuthProvider>
+    <AuthProvider auth={auth}>
       <Auth />
     </AuthProvider>
   );

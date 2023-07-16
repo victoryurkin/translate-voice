@@ -3,7 +3,7 @@ import { useTranslation } from '@translate-voice/i18n';
 import { UserIcon } from '@heroicons/react/24/solid';
 import { Input, Button } from '@translate-voice/components';
 import { useForm, Controller } from '@translate-voice/hooks';
-import { signIn } from '@translate-voice/services';
+import { useAuth } from '@translate-voice/context';
 
 interface FormData {
   email: string;
@@ -20,6 +20,7 @@ export const Signin: FC<Props> = ({ onForgotPassword, onSuccess }) => {
   const [error, setError] = useState<string>();
 
   const { t } = useTranslation();
+  const { signIn } = useAuth();
 
   const {
     control,
@@ -29,12 +30,16 @@ export const Signin: FC<Props> = ({ onForgotPassword, onSuccess }) => {
 
   const onSubmit = handleSubmit(async (data: unknown) => {
     try {
+      console.log('!!!', 'Singing in...');
       const formData = data as FormData;
+      console.log('!!!', formData);
       setLoading(true);
-      await signIn(formData.email, formData.password);
+      const response = await signIn(formData.email, formData.password);
+      console.log('!!!', response);
       onSuccess();
     } catch (error) {
       console.error(error);
+      console.log('!!!', error);
       setError(t('generic_error'));
     } finally {
       setLoading(false);

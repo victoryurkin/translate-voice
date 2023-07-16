@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import cx from 'classnames';
-import { signIn } from '@translate-voice/services';
+import { useAuth } from '@translate-voice/context';
 import { SignupForm, SignupData } from './signup';
 import { Otp } from './otp';
 
@@ -18,6 +18,8 @@ export const Signup: FC = () => {
   const [virtualRoute, setVirtualRoute] = useState<VirtualRoutes>(VirtualRoutes.SIGN_UP);
   const [navigation, toggleNavigation] = useState<Navigation>();
   const [signupData, setSignupData] = useState<SignupData>();
+
+  const { signIn } = useAuth();
 
   const navigate = (route: VirtualRoutes) => {
     toggleNavigation(Navigation.FROM_START);

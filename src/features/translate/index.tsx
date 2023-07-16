@@ -4,13 +4,14 @@ import cx from 'classnames';
 // import { Recorder } from './recorder/recorder';
 import { Button } from './button/button';
 import { flags } from '@translate-voice/assets';
-import { transcribe, translate, speech, transcribeUpload } from '@translate-voice/services';
+// import { transcribe, translate, speech, transcribeUpload } from '@translate-voice/services';
 import { registerPlugin } from '@capacitor/core';
-import { useRecorder } from './recorder/recorder';
+// import { useRecorder } from './recorder/recorder';
 import { PulseLoader } from 'react-spinners';
 import { useTranslation } from '@translate-voice/i18n';
 import { supportedLanguages, Language } from '@translate-voice/constants';
 import { LanguageSelector } from './language-selector/language-selector';
+import { useMicrophoneStream } from './recorder/microphone-stream';
 
 //#region iOS Capacitor Plugin
 export interface PlayerIosPlugin {
@@ -20,17 +21,23 @@ const PlayerIos = registerPlugin<PlayerIosPlugin>('PlayerIos');
 
 export const Translate: FC = () => {
   const [isLoading, setLoading] = useState(false);
-  const [topText, setTopText] = useState<string>();
-  const [bottomText, setBottomText] = useState<string>();
   const [isLoaded, setLoaded] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [activeBar, setActiveBar] = useState<string>('none');
-  const [sourceLanguage, setSourceLanguage] = useState<Language>(supportedLanguages['en-US']);
-  const [targetLanguage, setTargetLanguage] = useState<Language>(supportedLanguages['ru-RU']);
-  const [preferredVoice] = useState('male');
+  const [topLanguage, setTopLanguage] = useState<Language>(supportedLanguages['en-US']);
+  const [bottomLanguage, setBottomLanguage] = useState<Language>(supportedLanguages['ru-RU']);
+  // const [preferredVoice] = useState('male');
   const [languageSelector, setLanguageSelector] = useState<'top' | 'bottom'>();
 
-  const { startRecording, stopRecording } = useRecorder();
+  const {
+    sourceLanguage,
+    targetLanguage,
+    transcription,
+    translation,
+    audioOutput,
+    startRecording,
+    stopRecording,
+  } = useMicrophoneStream();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -78,81 +85,33 @@ export const Translate: FC = () => {
     'bg-white': activeBar === 'bottom',
   });
 
-  const onEnd = async () => {
-    setLoading(true);
-    try {
-      const recording = await stopRecording();
-
-      let sourceText = '';
-      if (activeBar === 'top') {
-        if (sourceLanguage.streaming) {
-          sourceText = await transcribe(recording, sourceLanguage.code);
-        } else {
-          sourceText = await transcribeUpload(recording, sourceLanguage.code);
-        }
-      } else {
-        if (targetLanguage.streaming) {
-          sourceText = await transcribe(recording, targetLanguage.code);
-        } else {
-          sourceText = await transcribeUpload(recording, targetLanguage.code);
-        }
-      }
-
-      if (activeBar === 'top') {
-        setTopText(sourceText);
-      } else {
-        setBottomText(sourceText);
-      }
-
-      let translateResponse = '';
-      if (activeBar === 'top') {
-        translateResponse = await translate(
-          sourceText,
-          sourceLanguage.translateCode,
-          targetLanguage.translateCode
-        );
-        setBottomText(translateResponse);
-      } else {
-        translateResponse = await translate(
-          sourceText,
-          targetLanguage.translateCode,
-          sourceLanguage.translateCode
-        );
-        setTopText(translateResponse);
-      }
-
-      let speechResponse = '';
-      let voice: string;
-      if (activeBar === 'top') {
-        if (targetLanguage.voices[preferredVoice]) {
-          voice = targetLanguage.voices[preferredVoice]!;
-        } else {
-          voice = targetLanguage.voices.male || targetLanguage.voices.female!;
-        }
-      } else {
-        if (sourceLanguage.voices[preferredVoice]) {
-          voice = sourceLanguage.voices[preferredVoice]!;
-        } else {
-          voice = sourceLanguage.voices.male || sourceLanguage.voices.female!;
-        }
-      }
-      speechResponse = await speech(translateResponse, voice);
-
-      await PlayerIos.play({
-        file: speechResponse,
-      });
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setActiveBar('none');
-      setLoading(false);
-    }
+  const onStartTranslation = (direction: string) => {
+    startRecording(
+      direction === 'top' ? topLanguage.code : bottomLanguage.code,
+      direction === 'top' ? bottomLanguage.code : topLanguage.code
+    );
+    setActiveBar(direction);
   };
+
+  const onStopRecording = () => {
+    setLoading(true);
+    stopRecording();
+  };
+
+  useEffect(() => {
+    if (audioOutput !== undefined) {
+      setLoading(false);
+      setActiveBar('none');
+      PlayerIos.play({
+        file: audioOutput,
+      });
+    }
+  }, [audioOutput]);
 
   const selectLanguage = (code: string) => {
     languageSelector === 'top'
-      ? setSourceLanguage(supportedLanguages[code])
-      : setTargetLanguage(supportedLanguages[code]);
+      ? setTopLanguage(supportedLanguages[code])
+      : setBottomLanguage(supportedLanguages[code]);
     setLanguageSelector(undefined);
   };
 
@@ -163,25 +122,25 @@ export const Translate: FC = () => {
           <div
             className="rounded-full overflow-hidden w-16 h-16 mx-auto mt-14 border shadow-lg"
             onClick={() => setLanguageSelector('top')}>
-            <img src={flags[sourceLanguage.code]} className="h-16" alt={sourceLanguage.code} />
+            <img src={flags[topLanguage.code]} className="h-16" alt={topLanguage.code} />
           </div>
-          <p className="text-center text-secondary-400">{sourceLanguage.name}</p>
+          <p className="text-center text-secondary-400">{topLanguage.name}</p>
         </div>
         <div className={mainContainerClasses}>
           <div className={topContainerClasses}>
-            {isLoading && activeBar === 'top' && !topText && (
+            {isLoading && activeBar === 'top' && !transcription && (
               <div className="h-full flex items-center justify-center">
                 <PulseLoader color="#cccccc" />
               </div>
             )}
-            {isLoading && activeBar === 'bottom' && bottomText && (
+            {isLoading && activeBar === 'bottom' && transcription && (
               <div className="h-full flex items-center justify-center">
                 <PulseLoader color="#cccccc" />
               </div>
             )}
             <div className="pt-40 px-xl text-secondary-600 text-center h-full pb-40">
               <div className="h-full overflow-y-auto flex items-center justify-center">
-                {topText}
+                {sourceLanguage === topLanguage.code ? transcription : translation}
               </div>
             </div>
           </div>
@@ -190,19 +149,9 @@ export const Translate: FC = () => {
               <Button
                 isLoading={isLoading}
                 isDisabled={isLoading}
-                onUpStart={() => {
-                  setActiveBar('top');
-                  startRecording();
-                  setTopText(undefined);
-                  setBottomText(undefined);
-                }}
-                onDownStart={() => {
-                  setActiveBar('bottom');
-                  startRecording();
-                  setTopText(undefined);
-                  setBottomText(undefined);
-                }}
-                onEnd={onEnd}
+                onUpStart={() => onStartTranslation('top')}
+                onDownStart={() => onStartTranslation('bottom')}
+                onEnd={onStopRecording}
               />
             </div>
             <div className="text-left flex-1 flex items-center uppercase text-secondary-400">
@@ -216,35 +165,35 @@ export const Translate: FC = () => {
             </div>
           </div>
           <div className={bottomContainerClasses}>
-            {isLoading && activeBar === 'top' && !bottomText && topText && (
+            {isLoading && activeBar === 'top' && !translation && transcription && (
               <div className="h-full flex items-center justify-center">
                 <PulseLoader color="#cccccc" />
               </div>
             )}
-            {isLoading && activeBar === 'bottom' && !bottomText && (
+            {isLoading && activeBar === 'bottom' && !transcription && (
               <div className="h-full flex items-center justify-center">
                 <PulseLoader color="#cccccc" />
               </div>
             )}
             <div className="pt-36 px-xl text-secondary-600 text-center h-full pb-40">
               <div className="h-full overflow-y-auto flex items-center justify-center">
-                {bottomText}
+                {targetLanguage === bottomLanguage.code ? translation : transcription}
               </div>
             </div>
           </div>
         </div>
         <div className={bottomBarClasses}>
-          <p className="text-center text-secondary-400 -mt-12">{targetLanguage.name}</p>
+          <p className="text-center text-secondary-400 -mt-12">{bottomLanguage.name}</p>
           <div
             className="rounded-full overflow-hidden w-16 h-16 mx-auto border shadow-lg"
             onClick={() => setLanguageSelector('bottom')}>
-            <img src={flags[targetLanguage.code]} className="h-16" alt={targetLanguage.code} />
+            <img src={flags[bottomLanguage.code]} className="h-16" alt={bottomLanguage.code} />
           </div>
         </div>
       </div>
       <LanguageSelector
         languageSelector={languageSelector}
-        selectedLanguage={languageSelector === 'top' ? sourceLanguage.code : targetLanguage.code}
+        selectedLanguage={languageSelector === 'top' ? topLanguage.code : bottomLanguage.code}
         onClose={() => setLanguageSelector(undefined)}
         onSelect={selectLanguage}
       />

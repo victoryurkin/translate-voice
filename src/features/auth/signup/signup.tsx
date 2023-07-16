@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { useTranslation } from '@translate-voice/i18n';
 import { UserIcon } from '@heroicons/react/24/solid';
-import { signUp } from '@translate-voice/services';
+// import { signUp } from '@translate-voice/services';
 import { Input, Button } from '@translate-voice/components';
 import { useForm, Controller } from '@translate-voice/hooks';
 
@@ -50,7 +50,7 @@ export const SignupForm: FC<Props> = ({ onSuccess }) => {
       const isValid = validate(formData);
       if (isValid) {
         setLoading(true);
-        await signUp(formData.email, formData.password);
+        // await signUp(formData.email, formData.password);
         onSuccess({
           email: formData.email,
           password: formData.password,

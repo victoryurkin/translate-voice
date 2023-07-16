@@ -1,6 +1,6 @@
 /* eslint-disable indent */
-import { createContext, FC, useReducer, useContext, ReactNode, useEffect } from 'react';
-import { getAuthUser, getAccessToken, AuthUser } from '@translate-voice/services';
+import { createContext, FC, useReducer, useContext, ReactNode, useMemo } from 'react';
+import { Auth, onAuthStateChanged, User, signInWithEmailAndPassword } from 'firebase/auth';
 
 /**
  * The Auth state property been injected to a component using withAuth HOC.
@@ -12,12 +12,16 @@ import { getAuthUser, getAccessToken, AuthUser } from '@translate-voice/services
 export interface AuthState {
   isLoading: boolean;
   error?: Error;
-  authUser?: AuthUser;
+  authUser?: User;
   accessToken?: string;
+  signIn: (username: string, password: string) => Promise<void>;
 }
 
 const initialState: AuthState = {
-  isLoading: true,
+  isLoading: false,
+  signIn: async () => {
+    console.log('AuthProvider was not set up');
+  },
 };
 
 const AuthContext = createContext(initialState);
@@ -49,7 +53,7 @@ const reducer = (state: AuthState, { type, payload }: DispatchProps) => {
     case DispatchTypes.SET_AUTH_USER:
       return {
         ...state,
-        authUser: payload as AuthUser,
+        authUser: payload as User,
       };
     case DispatchTypes.SET_ACCESS_TOKEN:
       return {
@@ -62,6 +66,7 @@ const reducer = (state: AuthState, { type, payload }: DispatchProps) => {
 };
 
 interface AuthProviderProps {
+  auth: Auth;
   children: ReactNode;
 }
 
@@ -69,38 +74,50 @@ interface AuthProviderProps {
  * Auth Context Provider
  * @returns JSX.Element
  */
-export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: FC<AuthProviderProps> = ({ children, auth }) => {
   const [authState, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
-    const loadAuthUser = async () => {
-      try {
-        const responses = await Promise.all([getAuthUser(), getAccessToken()]);
-        dispatch({
-          type: DispatchTypes.SET_AUTH_USER,
-          payload: responses[0],
-        });
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      dispatch({
+        type: DispatchTypes.SET_AUTH_USER,
+        payload: user,
+      });
+      const accessToken = await user.getIdToken();
+      dispatch({
+        type: DispatchTypes.SET_ACCESS_TOKEN,
+        payload: accessToken,
+      });
+    }
+  });
+
+  const signIn = async (username: string, password: string) => {
+    const userCredential = await signInWithEmailAndPassword(auth, username, password);
+    console.log('!!!', userCredential);
+    if (userCredential?.user) {
+      dispatch({
+        type: DispatchTypes.SET_AUTH_USER,
+        payload: userCredential.user,
+      });
+      const accessToken = await userCredential.user.getIdToken();
+      if (accessToken) {
         dispatch({
           type: DispatchTypes.SET_ACCESS_TOKEN,
-          payload: responses[1],
-        });
-      } catch (error) {
-        dispatch({
-          type: DispatchTypes.SET_ERROR,
-          payload: error,
-        });
-      } finally {
-        dispatch({
-          type: DispatchTypes.SET_LOADING,
-          payload: false,
+          payload: accessToken,
         });
       }
-    };
+    }
+  };
 
-    loadAuthUser();
-  }, []);
+  const providerValue = useMemo(
+    () => ({
+      ...authState,
+      signIn,
+    }),
+    [authState]
+  );
 
-  return <AuthContext.Provider value={authState}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={providerValue}>{children}</AuthContext.Provider>;
 };
 
 interface AuthContextProps {

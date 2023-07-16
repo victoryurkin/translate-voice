@@ -3,18 +3,18 @@ import { useTranslation } from '@translate-voice/i18n';
 import { UserIcon } from '@heroicons/react/24/solid';
 import { Input, Button } from '@translate-voice/components';
 import { useForm, Controller } from '@translate-voice/hooks';
-import { confirmSignUp } from '@translate-voice/services';
+// import { useAuth } from '@translate-voice/context';
 
-interface FormData {
-  otp: string;
-}
+// interface FormData {
+//   otp: string;
+// }
 
 interface Props {
   email: string;
   onSuccess: () => void;
 }
 
-export const Otp: FC<Props> = ({ email, onSuccess }) => {
+export const Otp: FC<Props> = ({ onSuccess }) => {
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -26,11 +26,11 @@ export const Otp: FC<Props> = ({ email, onSuccess }) => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = handleSubmit(async (data: unknown) => {
+  const onSubmit = handleSubmit(async () => {
     try {
-      const formData = data as FormData;
+      // const formData = data as FormData;
       setLoading(true);
-      await confirmSignUp(email, formData.otp);
+      // await confirmSignUp(email, formData.otp);
       onSuccess();
     } catch (error) {
       console.error(error);
