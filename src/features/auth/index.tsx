@@ -7,6 +7,7 @@ import { useAuth } from '@translate-voice/context';
 import { Signin } from './signin/signin';
 import { Signup } from './signup/signup';
 import { ForgotPassword } from './forgot-password';
+import mainBanner from '@translate-voice/assets/images/main.png';
 
 enum VirtualRoutes {
   SIGN_IN,
@@ -74,7 +75,11 @@ export const Auth: FC = () => {
   return (
     <div className={containerClasses}>
       <div className="flex-1">
-        <div className={topBarClasses} />
+        <div className={topBarClasses}>
+          <div className="h-full flex items-center justify-center px-4xl sm:px-mega overflow-hidden">
+            <img src={mainBanner} className="" alt="" />
+          </div>
+        </div>
         <div className={routerClasses}>
           {virtualRoute === VirtualRoutes.SIGN_IN && (
             <Signin

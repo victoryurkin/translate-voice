@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { FC, useState } from 'react';
 import { useTranslation } from '@translate-voice/i18n';
-import { UserIcon } from '@heroicons/react/24/solid';
+// import { UserIcon } from '@heroicons/react/24/solid';
 import { Input, Button } from '@translate-voice/components';
 import { useForm, Controller } from '@translate-voice/hooks';
 import { useAuth, AuthError, AuthErrorCodes } from '@translate-voice/context';
@@ -51,8 +51,14 @@ export const Signin: FC<Props> = ({ onForgotPassword, onSuccess }) => {
   });
 
   return (
-    <div className="flex flex-col justify-center pt-4xl">
-      <UserIcon className="h-20 fill-primary-600" />
+    <div className="flex flex-col justify-center pt-xl">
+      <div>
+        <p className="main-header text-center text-4xl mt-3xl text-primary-800">Translate Us</p>
+        <p className="main-header text-center text-md mt-md text-secondary-600">
+          speech translation
+        </p>
+      </div>
+      {/* <UserIcon className="h-20 fill-primary-600" /> */}
       <div className="flex justify-center py-3xl px-lg">
         <form className="flex-1 max-w-xs md:max-w-md" onSubmit={onSubmit}>
           <div className="mb-lg">
