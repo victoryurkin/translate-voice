@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import cx from 'classnames';
 import { useTranslation } from '@translate-voice/i18n';
 import { routes } from '@translate-voice/constants';
+import { useAuth } from '@translate-voice/context';
 import { Signin } from './signin/signin';
 import { Signup } from './signup';
 import { ForgotPassword } from './forgot-password';
@@ -19,17 +20,22 @@ export const Auth: FC = () => {
   const [navigation, toggleNavigation] = useState(false);
   const [virtualRoute, setVirtualRoute] = useState<VirtualRoutes>(VirtualRoutes.SIGN_IN);
 
+  const { authUser } = useAuth();
   const { t } = useTranslation();
   const navigateToRoute = useNavigate();
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoaded(true);
-      toggleNavigation(true);
-    }, 100);
-    setTimeout(() => {
-      setHasAnimated(true);
-    }, 600);
+    if (authUser) {
+      navigateToRoute(routes.TRANSLATE.path);
+    } else {
+      setTimeout(() => {
+        setLoaded(true);
+        toggleNavigation(true);
+      }, 100);
+      setTimeout(() => {
+        setHasAnimated(true);
+      }, 600);
+    }
   }, []);
 
   const containerClasses = cx({

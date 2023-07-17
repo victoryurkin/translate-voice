@@ -20,18 +20,19 @@ export const LanguageSelector: FC<LanguageSelectorProps> = ({
   return (
     <Modal isOpen={!!languageSelector} onClose={onClose}>
       {Object.keys(supportedLanguages).map((key, index) => {
+        const language = supportedLanguages[key];
         const classes = cx(
-          'p-md transition-colors hover:bg-secondary-100 active:bg-secondary-200 cursor-pointer',
+          'flex items-center py-md px-xl transition-colors hover:bg-secondary-100 active:bg-secondary-200 cursor-pointer',
           {
             'bg-secondary-100': key === selectedLanguage,
           }
         );
         return (
           <div key={index} className={classes} onClick={() => onSelect(key)}>
-            <div className="flex justify-center">
-              <img src={flags[key]} className="h-14" alt={key} />
+            <div className="h-8 w-11 overflow-hidden border mr-lg">
+              <img src={flags[key]} className="h-8" alt={key} />
             </div>
-            <p className="typo-sm text-center text-secondary-500">{key}</p>
+            <p className="typo-sm text-secondary-500">{language.name}</p>
           </div>
         );
       })}

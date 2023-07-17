@@ -38,9 +38,11 @@ const PermissionsIos = registerPlugin<PermissionsIosPlugin>('PermissionsIos');
 const App = () => {
   useEffect(() => {
     const checkPermissions = async () => {
-      await PermissionsIos.grantPermission({
-        type: 'microphone',
-      });
+      if (Capacitor.getPlatform() === 'ios') {
+        await PermissionsIos.grantPermission({
+          type: 'microphone',
+        });
+      }
     };
     checkPermissions();
   }, []);

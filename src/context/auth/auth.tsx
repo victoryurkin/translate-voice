@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import { createContext, FC, useReducer, useContext, ReactNode, useMemo } from 'react';
+import { createContext, FC, useReducer, useContext, ReactNode, useMemo, useEffect } from 'react';
 import { Auth, onAuthStateChanged, User, signInWithEmailAndPassword } from 'firebase/auth';
 
 /**
@@ -18,7 +18,7 @@ export interface AuthState {
 }
 
 const initialState: AuthState = {
-  isLoading: false,
+  isLoading: true,
   signIn: async () => {
     console.log('AuthProvider was not set up');
   },
@@ -77,23 +77,8 @@ interface AuthProviderProps {
 export const AuthProvider: FC<AuthProviderProps> = ({ children, auth }) => {
   const [authState, dispatch] = useReducer(reducer, initialState);
 
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      dispatch({
-        type: DispatchTypes.SET_AUTH_USER,
-        payload: user,
-      });
-      const accessToken = await user.getIdToken();
-      dispatch({
-        type: DispatchTypes.SET_ACCESS_TOKEN,
-        payload: accessToken,
-      });
-    }
-  });
-
   const signIn = async (username: string, password: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, username, password);
-    console.log('!!!', userCredential);
     if (userCredential?.user) {
       dispatch({
         type: DispatchTypes.SET_AUTH_USER,
@@ -108,6 +93,31 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, auth }) => {
       }
     }
   };
+
+  useEffect(() => {
+    onAuthStateChanged(auth, async (user) => {
+      try {
+        if (user) {
+          dispatch({
+            type: DispatchTypes.SET_AUTH_USER,
+            payload: user,
+          });
+          const accessToken = await user.getIdToken();
+          dispatch({
+            type: DispatchTypes.SET_ACCESS_TOKEN,
+            payload: accessToken,
+          });
+        }
+      } catch (error) {
+        console.log('Error getting user: ', error);
+      } finally {
+        dispatch({
+          type: DispatchTypes.SET_LOADING,
+          payload: false,
+        });
+      }
+    });
+  }, []);
 
   const providerValue = useMemo(
     () => ({

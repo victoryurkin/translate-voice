@@ -32,6 +32,7 @@ let microphoneStream: MicStream | undefined;
 let socket: Socket;
 
 export const useMicrophoneStream = () => {
+  const [isError, setError] = useState(false);
   const [sourceLanguage, setSourceLanguage] = useState<string>();
   const [targetLanguage, setTargetLanguage] = useState<string>();
   const [transcription, setTranscription] = useState<string>();
@@ -41,6 +42,7 @@ export const useMicrophoneStream = () => {
   const { accessToken } = useAuth();
 
   const startRecording = async (sourceLanguage: string, targetLanguage: string) => {
+    setError(false);
     setTranscription(undefined);
     setTranslation(undefined);
     setAudioOutput(undefined);
@@ -51,8 +53,8 @@ export const useMicrophoneStream = () => {
       microphoneStream = new MicrophoneStream() as MicStream;
       microphoneStream.setStream(stream);
 
-      socket = io('https://translate-stream-service-ocrtlpqp4q-uk.a.run.app', {
-        // socket = io('http://localhost:8000', {
+      // socket = io('https://translate-stream-service-ocrtlpqp4q-uk.a.run.app', {
+      socket = io('http://localhost:8000', {
         query: { sourceLang: sourceLanguage, targetLang: targetLanguage },
         auth: {
           token: accessToken,
@@ -70,6 +72,14 @@ export const useMicrophoneStream = () => {
 
       socket.on('translationData', (data: unknown) => {
         setTranslation(data as string);
+      });
+
+      socket.on('disconnect', () => {
+        if (microphoneStream) {
+          microphoneStream.stop();
+          microphoneStream = undefined;
+        }
+        setError(true);
       });
 
       microphoneStream &&
@@ -94,6 +104,10 @@ export const useMicrophoneStream = () => {
       socket.emit('translate', {
         transcription,
       });
+    } else {
+      setTimeout(() => {
+        socket.emit('emptyTranscription');
+      }, 2000);
     }
 
     if (socket) {
@@ -112,6 +126,7 @@ export const useMicrophoneStream = () => {
     transcription,
     translation,
     audioOutput,
+    isError,
     startRecording,
     stopRecording,
   };

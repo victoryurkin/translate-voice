@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import cx from 'classnames';
 // import { Recorder } from './recorder/recorder';
 import { Button } from './button/button';
 import { flags } from '@translate-voice/assets';
 // import { transcribe, translate, speech, transcribeUpload } from '@translate-voice/services';
-import { registerPlugin } from '@capacitor/core';
+import { registerPlugin, Capacitor } from '@capacitor/core';
 // import { useRecorder } from './recorder/recorder';
 import { PulseLoader } from 'react-spinners';
 import { useTranslation } from '@translate-voice/i18n';
-import { supportedLanguages, Language } from '@translate-voice/constants';
+import { supportedLanguages, Language, routes } from '@translate-voice/constants';
 import { LanguageSelector } from './language-selector/language-selector';
 import { useMicrophoneStream } from './recorder/microphone-stream';
+import { useAuth } from '@translate-voice/context';
 
 //#region iOS Capacitor Plugin
 export interface PlayerIosPlugin {
@@ -35,19 +37,34 @@ export const Translate: FC = () => {
     transcription,
     translation,
     audioOutput,
+    isError,
     startRecording,
     stopRecording,
   } = useMicrophoneStream();
+
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { authUser } = useAuth();
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoaded(true);
-    }, 100);
-    setTimeout(() => {
-      setHasAnimated(true);
-    }, 600);
+    if (authUser) {
+      setTimeout(() => {
+        setLoaded(true);
+      }, 100);
+      setTimeout(() => {
+        setHasAnimated(true);
+      }, 600);
+    } else {
+      navigate(routes.AUTH.path);
+    }
   }, []);
+
+  useEffect(() => {
+    if (isError) {
+      setLoading(false);
+      setActiveBar('none');
+    }
+  }, [isError]);
 
   const containerClasses = cx({
     'h-full flex flex-col': true,
@@ -102,9 +119,11 @@ export const Translate: FC = () => {
     if (audioOutput !== undefined) {
       setLoading(false);
       setActiveBar('none');
-      PlayerIos.play({
-        file: audioOutput,
-      });
+      if (Capacitor.getPlatform() === 'ios') {
+        PlayerIos.play({
+          file: audioOutput,
+        });
+      }
     }
   }, [audioOutput]);
 
