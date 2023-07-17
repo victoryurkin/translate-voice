@@ -56,7 +56,7 @@ export const Button: FC<ButtonProps> = ({
           } else if (pageY - initMousePosition.current < 0) {
             buttonPositionChange.current = -1;
           }
-          setButtonPosition(pageY - initMousePosition.current > 0 ? 62 : -62);
+          setButtonPosition(pageY - initMousePosition.current > 0 ? 47 : -47);
         }
       }
     };
@@ -121,7 +121,7 @@ export const Button: FC<ButtonProps> = ({
   }, [buttonPositionChange.current]);
 
   const buttonClasses = cx(
-    'w-40 h-40 rounded-full bg-primary-500 flex items-center justify-center',
+    'w-32 h-32 rounded-full bg-primary-500 flex items-center justify-center',
     'transition-transform duration-300 ease-out',
     {
       'bg-primary-700': isMoving.current,
@@ -129,7 +129,7 @@ export const Button: FC<ButtonProps> = ({
   );
 
   return (
-    <div className="rounded-full w-40 h-72 bg-secondary-300 flex items-center justify-center shadow-inner">
+    <div className="rounded-full w-32 h-56 bg-secondary-300 flex items-center justify-center shadow-inner">
       {!isDisabled && (
         <div
           style={{ transform: `translateY(${buttonPosition}px)` }}

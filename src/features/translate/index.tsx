@@ -1,18 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cx from 'classnames';
-// import { Recorder } from './recorder/recorder';
 import { Button } from './button/button';
 import { flags } from '@translate-voice/assets';
-// import { transcribe, translate, speech, transcribeUpload } from '@translate-voice/services';
 import { registerPlugin, Capacitor } from '@capacitor/core';
-// import { useRecorder } from './recorder/recorder';
 import { PulseLoader } from 'react-spinners';
-import { useTranslation } from '@translate-voice/i18n';
 import { supportedLanguages, Language, routes } from '@translate-voice/constants';
 import { LanguageSelector } from './language-selector/language-selector';
-import { useMicrophoneStream } from './recorder/microphone-stream';
+import { useMicrophoneStream } from './stream/microphone-stream';
 import { useAuth } from '@translate-voice/context';
 
 //#region iOS Capacitor Plugin
@@ -42,7 +37,6 @@ export const Translate: FC = () => {
     stopRecording,
   } = useMicrophoneStream();
 
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { authUser } = useAuth();
 
@@ -139,9 +133,11 @@ export const Translate: FC = () => {
       <div className={containerClasses}>
         <div className={topBarClasses}>
           <div
-            className="rounded-full overflow-hidden w-16 h-16 mx-auto mt-14 border shadow-lg"
+            className="rounded-full overflow-hidden w-16 h-16 mx-auto mt-14 border shadow-lg flex justify-center items-center relative"
             onClick={() => setLanguageSelector('top')}>
-            <img src={flags[topLanguage.code]} className="h-16" alt={topLanguage.code} />
+            <div className="w-24 h-16 absolute">
+              <img src={flags[topLanguage.code]} className="h-16" alt={topLanguage.code} />
+            </div>
           </div>
           <p className="text-center text-secondary-400">{topLanguage.name}</p>
         </div>
@@ -163,8 +159,8 @@ export const Translate: FC = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-center h-10 -mt-6 bg-white">
-            <div className="absolute -translate-y-32">
+          <div className="flex justify-center">
+            <div className="absolute -translate-y-28">
               <Button
                 isLoading={isLoading}
                 isDisabled={isLoading}
@@ -173,7 +169,7 @@ export const Translate: FC = () => {
                 onEnd={onStopRecording}
               />
             </div>
-            <div className="text-left flex-1 flex items-center uppercase text-secondary-400">
+            {/* <div className="text-left flex-1 flex items-center uppercase text-secondary-400">
               <p className="flex-1 text-right pr-lg">
                 {t('translate.swipe')} {'>'}
               </p>
@@ -181,7 +177,7 @@ export const Translate: FC = () => {
               <p className="flex-1 pl-lg">
                 {'<'} {t('translate.hold')}
               </p>
-            </div>
+            </div> */}
           </div>
           <div className={bottomContainerClasses}>
             {isLoading && activeBar === 'top' && !translation && transcription && (
@@ -204,9 +200,11 @@ export const Translate: FC = () => {
         <div className={bottomBarClasses}>
           <p className="text-center text-secondary-400 -mt-12">{bottomLanguage.name}</p>
           <div
-            className="rounded-full overflow-hidden w-16 h-16 mx-auto border shadow-lg"
+            className="rounded-full overflow-hidden w-16 h-16 mx-auto border shadow-lg flex justify-center items-center relative"
             onClick={() => setLanguageSelector('bottom')}>
-            <img src={flags[bottomLanguage.code]} className="h-16" alt={bottomLanguage.code} />
+            <div className="w-24 h-16 absolute">
+              <img src={flags[bottomLanguage.code]} className="h-16" alt={bottomLanguage.code} />
+            </div>
           </div>
         </div>
       </div>

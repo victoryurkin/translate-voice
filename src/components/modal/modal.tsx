@@ -78,7 +78,8 @@ export const Modal: FC<ModalProps> = ({
         <div
           className={modalClasses}
           onClick={(e) => e.stopPropagation()}
-          data-testid="children-container">
+          data-testid="modal-container"
+          id="modal-body">
           {children}
         </div>
       </Transition.Child>
