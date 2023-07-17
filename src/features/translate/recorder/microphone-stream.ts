@@ -53,8 +53,8 @@ export const useMicrophoneStream = () => {
       microphoneStream = new MicrophoneStream() as MicStream;
       microphoneStream.setStream(stream);
 
-      // socket = io('https://translate-stream-service-ocrtlpqp4q-uk.a.run.app', {
-      socket = io('http://localhost:8000', {
+      socket = io('https://translate-stream-service-ocrtlpqp4q-uk.a.run.app', {
+        // socket = io('http://localhost:8000', {
         query: { sourceLang: sourceLanguage, targetLang: targetLanguage },
         auth: {
           token: accessToken,

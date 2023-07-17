@@ -1,11 +1,14 @@
 import { FC } from 'react';
 import cx from 'classnames';
 import { twMerge } from 'tailwind-merge';
+import { ClipLoader } from 'react-spinners';
 import { DefaultProps } from '../common/types';
 
 interface ButtonProps extends DefaultProps {
   type?: 'primary' | 'default' | 'link';
   htmlType?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  isLoading?: boolean;
   onClick?: () => void;
 }
 
@@ -16,11 +19,13 @@ export const Button: FC<ButtonProps> = ({
   ariaLabel,
   type = 'primary',
   htmlType = 'button',
+  disabled,
+  isLoading,
   children,
   onClick,
 }) => {
   const baseClass = cx({
-    'rounded-3xl px-8 py-3 typo-default shadow-sm': true,
+    'flex justify-center items-center rounded-3xl px-8 py-3 typo-default shadow-sm': true,
     'transition-colors': true,
     'focus-visible:outline-0 focus-visible:shadow-[0px_0px_0px_4px] ': true,
     'active:shadow-white': true,
@@ -30,6 +35,10 @@ export const Button: FC<ButtonProps> = ({
       type === 'default',
     'shadow-none focus-visible:shadow-none underline active:bg-secondary-100 focus-visible:bg-secondary-100':
       type === 'link',
+    'opacity-70': disabled,
+    'focus-visible:bg-primary-600 hover:bg-primary-600 active:bg-primary-600':
+      disabled && type === 'primary',
+    'focus-visible:bg-white hover:bg-white active:bg-white': disabled && type === 'default',
   });
   const finalClasses = twMerge(baseClass, className);
 
@@ -40,7 +49,11 @@ export const Button: FC<ButtonProps> = ({
       id={id}
       data-testid={testId}
       aria-label={ariaLabel}
-      onClick={onClick}>
+      disabled={disabled}
+      onClick={!disabled ? onClick : undefined}>
+      {isLoading && (
+        <ClipLoader color={type === 'primary' ? 'white' : '#aaaaaa'} className="mr-sm" size={22} />
+      )}
       {children}
     </button>
   );

@@ -13,7 +13,10 @@
     "otp_error": "Enter 6 chars code",
     "resend_otp": "Resend OTP",
     "passwords_dont_match": "Passwords do not match",
-    "password_error": "Minimum 6 chars, at least 1 number and 1 capital letter"
+    "password_error": "Minimum 6 chars, at least 1 number and 1 capital letter",
+    "errors": {
+      "email_password_not_found": "Email address or password not found"
+    }
   },
   "generic_error": "Something went wrong. Please, try again later.",
   "translate": {

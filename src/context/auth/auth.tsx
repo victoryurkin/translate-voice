@@ -2,6 +2,15 @@
 import { createContext, FC, useReducer, useContext, ReactNode, useMemo, useEffect } from 'react';
 import { Auth, onAuthStateChanged, User, signInWithEmailAndPassword } from 'firebase/auth';
 
+export enum AuthErrorCodes {
+  USER_NOT_FOUND = 'auth/user-not-found',
+  WRONG_PASSWORD = 'auth/wrong-password',
+}
+
+export interface AuthError {
+  code: AuthErrorCodes;
+}
+
 /**
  * The Auth state property been injected to a component using withAuth HOC.
  * @example

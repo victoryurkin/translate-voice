@@ -1,9 +1,10 @@
+/* eslint-disable indent */
 import { FC, useState } from 'react';
 import { useTranslation } from '@translate-voice/i18n';
 import { UserIcon } from '@heroicons/react/24/solid';
 import { Input, Button } from '@translate-voice/components';
 import { useForm, Controller } from '@translate-voice/hooks';
-import { useAuth } from '@translate-voice/context';
+import { useAuth, AuthError, AuthErrorCodes } from '@translate-voice/context';
 
 interface FormData {
   email: string;
@@ -30,17 +31,20 @@ export const Signin: FC<Props> = ({ onForgotPassword, onSuccess }) => {
 
   const onSubmit = handleSubmit(async (data: unknown) => {
     try {
-      console.log('!!!', 'Singing in...');
       const formData = data as FormData;
-      console.log('!!!', formData);
       setLoading(true);
-      const response = await signIn(formData.email, formData.password);
-      console.log('!!!', response);
+      await signIn(formData.email, formData.password);
       onSuccess();
     } catch (error) {
-      console.error(error);
-      console.log('!!!', error);
-      setError(t('generic_error'));
+      const authError = error as AuthError;
+      switch (authError.code) {
+        case AuthErrorCodes.USER_NOT_FOUND:
+        case AuthErrorCodes.WRONG_PASSWORD:
+          setError(t('auth.errors.email_password_not_found'));
+          break;
+        default:
+          setError(t('generic_error'));
+      }
     } finally {
       setLoading(false);
     }
@@ -99,15 +103,15 @@ export const Signin: FC<Props> = ({ onForgotPassword, onSuccess }) => {
             />
           </div>
 
-          {error && <p className="mb-md text-red-500 text-sm">{error}</p>}
+          {error && <p className="mb-md text-red-500 text-sm text-center">{error}</p>}
 
           <div className="text-center mb-xl">
-            <Button className="w-full" htmlType="submit">
+            <Button className="w-full" htmlType="submit" disabled={isLoading} isLoading={isLoading}>
               {t('auth.signin')}
             </Button>
           </div>
           <div className="text-center">
-            <Button className="w-full" type="link" onClick={onForgotPassword}>
+            <Button className="w-full" type="link" onClick={onForgotPassword} disabled={isLoading}>
               {t('auth.forgot_password')}
             </Button>
           </div>
