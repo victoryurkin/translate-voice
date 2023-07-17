@@ -1,7 +1,8 @@
+/* eslint-disable indent */
 import { FC, useState } from 'react';
 import { useTranslation } from '@translate-voice/i18n';
 import { UserIcon } from '@heroicons/react/24/solid';
-// import { signUp } from '@translate-voice/services';
+import { useAuth, AuthError, AuthErrorCodes } from '@translate-voice/context';
 import { Input, Button } from '@translate-voice/components';
 import { useForm, Controller } from '@translate-voice/hooks';
 
@@ -20,11 +21,12 @@ interface Props {
   onSuccess: (data: SignupData) => void;
 }
 
-export const SignupForm: FC<Props> = ({ onSuccess }) => {
+export const Signup: FC<Props> = ({ onSuccess }) => {
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
 
   const { t } = useTranslation();
+  const { signUp } = useAuth();
 
   const {
     control,
@@ -50,15 +52,21 @@ export const SignupForm: FC<Props> = ({ onSuccess }) => {
       const isValid = validate(formData);
       if (isValid) {
         setLoading(true);
-        // await signUp(formData.email, formData.password);
+        await signUp(formData.email, formData.password);
         onSuccess({
           email: formData.email,
           password: formData.password,
         });
       }
     } catch (error) {
-      console.error(error);
-      setError(t('generic_error'));
+      const authError = error as AuthError;
+      switch (authError.code) {
+        case AuthErrorCodes.EMAIL_ALREADY_USED:
+          setError(t('auth.errors.email_already_used'));
+          break;
+        default:
+          setError(t('generic_error'));
+      }
     } finally {
       setLoading(false);
     }
@@ -160,10 +168,10 @@ export const SignupForm: FC<Props> = ({ onSuccess }) => {
             />
           </div>
 
-          {error && <p className="mb-md text-red-500 text-sm">{error}</p>}
+          {error && <p className="mb-md text-red-500 text-sm text-center">{error}</p>}
 
           <div className="text-center mb-lg">
-            <Button className="w-full" htmlType="submit">
+            <Button className="w-full" htmlType="submit" disabled={isLoading} isLoading={isLoading}>
               {t('auth.signup')}
             </Button>
           </div>

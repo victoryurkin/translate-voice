@@ -5,7 +5,7 @@ import { useTranslation } from '@translate-voice/i18n';
 import { routes } from '@translate-voice/constants';
 import { useAuth } from '@translate-voice/context';
 import { Signin } from './signin/signin';
-import { Signup } from './signup';
+import { Signup } from './signup/signup';
 import { ForgotPassword } from './forgot-password';
 
 enum VirtualRoutes {
@@ -82,7 +82,9 @@ export const Auth: FC = () => {
               onSuccess={() => navigateToRoute(routes.TRANSLATE.path)}
             />
           )}
-          {virtualRoute === VirtualRoutes.SIGN_UP && <Signup />}
+          {virtualRoute === VirtualRoutes.SIGN_UP && (
+            <Signup onSuccess={() => navigateToRoute(routes.TRANSLATE.path)} />
+          )}
           {virtualRoute === VirtualRoutes.FORGOT_PASSWORD && <ForgotPassword />}
         </div>
       </div>

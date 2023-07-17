@@ -15,7 +15,8 @@
     "passwords_dont_match": "Passwords do not match",
     "password_error": "Minimum 6 chars, at least 1 number and 1 capital letter",
     "errors": {
-      "email_password_not_found": "Email address or password not found"
+      "email_password_not_found": "Email address or password not found",
+      "email_already_used": "Email address already exists"
     }
   },
   "generic_error": "Something went wrong. Please, try again later.",

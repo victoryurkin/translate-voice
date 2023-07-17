@@ -1,10 +1,18 @@
 /* eslint-disable indent */
 import { createContext, FC, useReducer, useContext, ReactNode, useMemo, useEffect } from 'react';
-import { Auth, onAuthStateChanged, User, signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  Auth,
+  onAuthStateChanged,
+  User,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  // sendEmailVerification,
+} from 'firebase/auth';
 
 export enum AuthErrorCodes {
   USER_NOT_FOUND = 'auth/user-not-found',
   WRONG_PASSWORD = 'auth/wrong-password',
+  EMAIL_ALREADY_USED = 'auth/email-already-in-use',
 }
 
 export interface AuthError {
@@ -24,12 +32,16 @@ export interface AuthState {
   authUser?: User;
   accessToken?: string;
   signIn: (username: string, password: string) => Promise<void>;
+  signUp: (username: string, password: string) => Promise<void>;
 }
 
 const initialState: AuthState = {
   isLoading: true,
   signIn: async () => {
-    console.log('AuthProvider was not set up');
+    console.log('AuthProvider was not setup');
+  },
+  signUp: async () => {
+    console.log('AuthProvider was not setup');
   },
 };
 
@@ -103,6 +115,26 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, auth }) => {
     }
   };
 
+  const signUp = async (username: string, password: string) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, username, password);
+    if (userCredential?.user) {
+      dispatch({
+        type: DispatchTypes.SET_AUTH_USER,
+        payload: userCredential.user,
+      });
+      const accessToken = await userCredential.user.getIdToken();
+      if (accessToken) {
+        dispatch({
+          type: DispatchTypes.SET_ACCESS_TOKEN,
+          payload: accessToken,
+        });
+      }
+      // if (auth.currentUser) {
+      //   await sendEmailVerification(auth.currentUser);
+      // }
+    }
+  };
+
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       try {
@@ -132,6 +164,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, auth }) => {
     () => ({
       ...authState,
       signIn,
+      signUp,
     }),
     [authState]
   );
