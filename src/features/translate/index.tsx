@@ -1,14 +1,19 @@
 import { FC, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import cx from 'classnames';
 import { Button } from './button/button';
 import { flags } from '@translate-voice/assets';
 import { registerPlugin, Capacitor } from '@capacitor/core';
 import { PulseLoader } from 'react-spinners';
-import { supportedLanguages, Language, routes } from '@translate-voice/constants';
+import { supportedLanguages, Language } from '@translate-voice/constants';
 import { LanguageSelector } from './language-selector/language-selector';
 import { useMicrophoneStream } from './stream/microphone-stream';
-import { useAuth } from '@translate-voice/context';
+import { withAuth, isAuthenticated } from '@translate-voice/context';
+import { compose } from '@translate-voice/utils';
+import { Cog8ToothIcon } from '@heroicons/react/24/outline';
+import { Settings, SettingsKey } from '@translate-voice/features';
+import { getDefaultLanguage } from '@translate-voice/i18n';
+import { local } from '@translate-voice/clients';
+import { defaultSettings } from '@translate-voice/constants';
 
 //#region iOS Capacitor Plugin
 export interface PlayerIosPlugin {
@@ -16,15 +21,29 @@ export interface PlayerIosPlugin {
 }
 const PlayerIos = registerPlugin<PlayerIosPlugin>('PlayerIos');
 
-export const Translate: FC = () => {
+const TranslateComponent: FC = () => {
   const [isLoading, setLoading] = useState(false);
   const [isLoaded, setLoaded] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [activeBar, setActiveBar] = useState<string>('none');
-  const [topLanguage, setTopLanguage] = useState<Language>(supportedLanguages['en-US']);
-  const [bottomLanguage, setBottomLanguage] = useState<Language>(supportedLanguages['ru-RU']);
+  const [topLanguage, setTopLanguage] = useState<Language>(
+    supportedLanguages[
+      (local.get(SettingsKey.DEFAULT_SOURCE_LANGUAGE) as string) ||
+        getDefaultLanguage() ||
+        defaultSettings.sourceLanguage
+    ]
+  );
+  const [bottomLanguage, setBottomLanguage] = useState<Language>(
+    supportedLanguages[
+      (local.get(SettingsKey.DEFAULT_TARGET_LANGUAGE) as string) ||
+        (defaultSettings.targetLanguage !== topLanguage.code
+          ? defaultSettings.targetLanguage
+          : defaultSettings.sourceLanguage)
+    ]
+  );
   // const [preferredVoice] = useState('male');
   const [languageSelector, setLanguageSelector] = useState<'top' | 'bottom'>();
+  const [isSettingsOpen, toggleSettings] = useState<boolean>(false);
 
   const {
     sourceLanguage,
@@ -37,20 +56,13 @@ export const Translate: FC = () => {
     stopRecording,
   } = useMicrophoneStream();
 
-  const navigate = useNavigate();
-  const { authUser } = useAuth();
-
   useEffect(() => {
-    if (authUser) {
-      setTimeout(() => {
-        setLoaded(true);
-      }, 100);
-      setTimeout(() => {
-        setHasAnimated(true);
-      }, 600);
-    } else {
-      navigate(routes.AUTH.path);
-    }
+    setTimeout(() => {
+      setLoaded(true);
+    }, 100);
+    setTimeout(() => {
+      setHasAnimated(true);
+    }, 600);
   }, []);
 
   useEffect(() => {
@@ -132,8 +144,15 @@ export const Translate: FC = () => {
     <>
       <div className={containerClasses}>
         <div className={topBarClasses}>
+          <div className="text-right">
+            <button
+              className="p-md mt-sm mr-sm active:bg-primary-500 rounded-full"
+              onClick={() => toggleSettings(true)}>
+              <Cog8ToothIcon className="w-8 h-8" color="white" />
+            </button>
+          </div>
           <div
-            className="rounded-full overflow-hidden w-16 h-16 mx-auto mt-14 border shadow-lg flex justify-center items-center relative"
+            className="rounded-full overflow-hidden w-16 h-16 -mt-md mx-auto border shadow-lg flex justify-center items-center relative"
             onClick={() => setLanguageSelector('top')}>
             <div className="w-24 h-16 absolute">
               <img src={flags[topLanguage.code]} className="h-16" alt={topLanguage.code} />
@@ -169,15 +188,6 @@ export const Translate: FC = () => {
                 onEnd={onStopRecording}
               />
             </div>
-            {/* <div className="text-left flex-1 flex items-center uppercase text-secondary-400">
-              <p className="flex-1 text-right pr-lg">
-                {t('translate.swipe')} {'>'}
-              </p>
-              <div className="w-40"></div>
-              <p className="flex-1 pl-lg">
-                {'<'} {t('translate.hold')}
-              </p>
-            </div> */}
           </div>
           <div className={bottomContainerClasses}>
             {isLoading && activeBar === 'top' && !translation && transcription && (
@@ -214,6 +224,9 @@ export const Translate: FC = () => {
         onClose={() => setLanguageSelector(undefined)}
         onSelect={selectLanguage}
       />
+      <Settings isOpen={isSettingsOpen} onClose={() => toggleSettings(false)} />
     </>
   );
 };
+
+export const Translate = compose(withAuth(isAuthenticated))(TranslateComponent);

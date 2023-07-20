@@ -4,6 +4,7 @@
     "password": "Password",
     "signin": "Sign In",
     "signup": "Sign Up",
+    "signout": "Sign Out",
     "forgot_password": "Forgot password?",
     "confirm_password": "Confirm password",
     "create_account": "Create an account",
@@ -23,5 +24,12 @@
   "translate": {
     "swipe": "swipe",
     "hold": "hold"
+  },
+  "settings": {
+    "default_languages": "Default Languages",
+    "default_source": "Default translate from:",
+    "default_target": "Default translate to:",
+    "default_voice": "Default Voice",
+    "male_female": "Male/Female"
   }
 }

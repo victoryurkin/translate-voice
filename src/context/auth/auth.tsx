@@ -6,8 +6,10 @@ import {
   User,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signOut as authSignOut,
   // sendEmailVerification,
 } from 'firebase/auth';
+import { notifications, Events } from '@translate-voice/clients';
 
 export enum AuthErrorCodes {
   USER_NOT_FOUND = 'auth/user-not-found',
@@ -33,6 +35,7 @@ export interface AuthState {
   accessToken?: string;
   signIn: (username: string, password: string) => Promise<void>;
   signUp: (username: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 const initialState: AuthState = {
@@ -41,6 +44,9 @@ const initialState: AuthState = {
     console.log('AuthProvider was not setup');
   },
   signUp: async () => {
+    console.log('AuthProvider was not setup');
+  },
+  signOut: async () => {
     console.log('AuthProvider was not setup');
   },
 };
@@ -135,6 +141,11 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, auth }) => {
     }
   };
 
+  const signOut = async () => {
+    await authSignOut(auth);
+    notifications.dispatch(Events.AUTH_SIGNOUT);
+  };
+
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       try {
@@ -147,6 +158,15 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, auth }) => {
           dispatch({
             type: DispatchTypes.SET_ACCESS_TOKEN,
             payload: accessToken,
+          });
+        } else {
+          dispatch({
+            type: DispatchTypes.SET_AUTH_USER,
+            payload: undefined,
+          });
+          dispatch({
+            type: DispatchTypes.SET_ACCESS_TOKEN,
+            payload: undefined,
           });
         }
       } catch (error) {
@@ -165,6 +185,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, auth }) => {
       ...authState,
       signIn,
       signUp,
+      signOut,
     }),
     [authState]
   );
@@ -194,11 +215,18 @@ export const withAuth =
   };
 
 /**
- * HOC condition to return nested component when user was loaded
+ * HOC condition to return nested component when user is authenticated
  * @returns JSX.Element
  * @example export default withUser(isLoaded)(MyComponent);
  */
 export const isAuthenticated = (authState: AuthState) => !!authState.authUser;
+
+/**
+ * HOC condition to return nested component when user is not authenticated
+ * @returns JSX.Element
+ * @example export default withUser(isLoaded)(MyComponent);
+ */
+export const isNotAuthenticated = (authState: AuthState) => !authState.authUser;
 
 // Custom hook to access the auth
 export const useAuth = () => useContext(AuthContext);

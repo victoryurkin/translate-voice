@@ -1,10 +1,11 @@
-import { FC } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { FC, useState } from 'react';
 import cx from 'classnames';
 import { Transition } from '@headlessui/react';
 import { DefaultProps } from '../common/types';
 import './modal.css';
 
-export interface ModalProps extends DefaultProps {
+export interface VerticalModalProps extends DefaultProps {
   /**
    * (Required) Is modal open.
    */
@@ -22,31 +23,46 @@ export interface ModalProps extends DefaultProps {
 /**
  * Modal window. Has two modes: default and full screen.
  */
-export const Modal: FC<ModalProps> = ({
+export const VerticalModal: FC<VerticalModalProps> = ({
   isOpen,
   isFullScreen = false,
   children,
   onClose,
   testId,
 }) => {
-  const modalClasses = cx({
-    [`
-      max-w-md min-h-3/10 max-h-4/5
-      bg-white rounded-t-4xl
-      overflow-hidden overflow-y-scroll
-      relative left-1/2 transform -translate-x-1/2
-    `]: !isFullScreen,
-    [`
-      w-full h-full
-      overflow-hidden overflow-y-scroll
-      bg-white
-    `]: isFullScreen,
-  });
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
-  const durationClasses = cx({
-    'duration-150 sm:duration-200': !isFullScreen,
-    'duration-200 sm:duration-300': isFullScreen,
-  });
+  // the required distance between touchStart and touchEnd to be detected as a swipe
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: any) => {
+    setTouchEnd(null); // otherwise the swipe is fired even with usual touch events
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: any) => setTouchEnd(e.targetTouches[0].clientX);
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    // const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isRightSwipe && onClose) {
+      onClose();
+    }
+  };
+
+  const modalClasses = cx(
+    `
+      h-full w-10/12 
+      bg-white rounded-l-3xl
+      overflow-hidden overflow-y-scroll
+      absolute right-0
+    `
+  );
+
+  const durationClasses = cx('duration-200 sm:duration-300');
 
   return (
     <Transition show={isOpen} appear data-testid={testId}>
@@ -67,21 +83,24 @@ export const Modal: FC<ModalProps> = ({
         data-testid="transition-child-2"
         className="fixed top-0 left-0 w-full h-full z-50 flex flex-col-reverse"
         enter={`transform transition ease-out ${durationClasses}`}
-        enterFrom="translate-y-full"
-        enterTo="translate-y-0"
+        enterFrom="translate-x-full"
+        enterTo="translate-x-0"
         leave={`transform transition ease-out ${durationClasses}`}
-        leaveFrom="translate-y-0"
-        leaveTo="translate-y-full"
+        leaveFrom="translate-x-0"
+        leaveTo="translate-x-full"
         onClick={onClose}>
         <div
           className={modalClasses}
           onClick={(e) => e.stopPropagation()}
           data-testid="modal-container"
-          id="modal-body">
+          id="modal-body"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}>
           {children}
         </div>
       </Transition.Child>
     </Transition>
   );
 };
-export default Modal;
+export default VerticalModal;

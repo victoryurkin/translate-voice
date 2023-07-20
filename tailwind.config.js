@@ -5,6 +5,6 @@ export default {
   theme: {
     extend: {},
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/forms')],
   presets: [require('./tailwind-presets.json')],
 };

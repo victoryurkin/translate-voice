@@ -1,9 +1,12 @@
 import { Router } from '../pages/router';
+import { BrowserRouter } from 'react-router-dom';
 
 const Auth = () => {
   return (
     <div className="h-full">
-      <Router />
+      <BrowserRouter>
+        <Router />
+      </BrowserRouter>
     </div>
   );
 };

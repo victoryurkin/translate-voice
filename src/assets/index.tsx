@@ -114,7 +114,7 @@ import esPY from './flags/py.png';
 import esPE from './flags/pe.png';
 import esPR from './flags/pr.png';
 import esES from './flags/es.png';
-import esUS from './flags/us.png';
+import esUS from './flags/es.png';
 import esUY from './flags/uy.png';
 import esVE from './flags/ve.png';
 import suID from './flags/id.png';

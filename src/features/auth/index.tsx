@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import cx from 'classnames';
 import { useTranslation } from '@translate-voice/i18n';
 import { routes } from '@translate-voice/constants';
-import { useAuth } from '@translate-voice/context';
+import { withAuth, isNotAuthenticated } from '@translate-voice/context';
+import { compose } from '@translate-voice/utils';
 import { Signin } from './signin/signin';
 import { Signup } from './signup/signup';
 import { ForgotPassword } from './forgot-password';
@@ -15,28 +16,23 @@ enum VirtualRoutes {
   FORGOT_PASSWORD,
 }
 
-export const Auth: FC = () => {
+const AuthComponent: FC = () => {
   const [isLoaded, setLoaded] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [navigation, toggleNavigation] = useState(false);
   const [virtualRoute, setVirtualRoute] = useState<VirtualRoutes>(VirtualRoutes.SIGN_IN);
 
-  const { authUser } = useAuth();
   const { t } = useTranslation();
   const navigateToRoute = useNavigate();
 
   useEffect(() => {
-    if (authUser) {
-      navigateToRoute(routes.TRANSLATE.path);
-    } else {
-      setTimeout(() => {
-        setLoaded(true);
-        toggleNavigation(true);
-      }, 100);
-      setTimeout(() => {
-        setHasAnimated(true);
-      }, 600);
-    }
+    setTimeout(() => {
+      setLoaded(true);
+      toggleNavigation(true);
+    }, 100);
+    setTimeout(() => {
+      setHasAnimated(true);
+    }, 600);
   }, []);
 
   const containerClasses = cx({
@@ -110,3 +106,5 @@ export const Auth: FC = () => {
     </div>
   );
 };
+
+export const Auth = compose(withAuth(isNotAuthenticated))(AuthComponent);
