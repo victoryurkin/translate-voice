@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import MicrophoneStream from 'microphone-stream';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@translate-voice/context';
@@ -38,8 +38,13 @@ export const useMicrophoneStream = () => {
   const [transcription, setTranscription] = useState<string>();
   const [translation, setTranslation] = useState<string>();
   const [audioOutput, setAudioOutput] = useState<string>();
+  const transcriptionRef = useRef<string>();
 
   const { accessToken } = useAuth();
+
+  useEffect(() => {
+    transcriptionRef.current = transcription;
+  }, [transcription]);
 
   const startRecording = async (sourceLanguage: string, targetLanguage: string) => {
     setError(false);
@@ -49,50 +54,54 @@ export const useMicrophoneStream = () => {
     setSourceLanguage(sourceLanguage);
     setTargetLanguage(targetLanguage);
 
-    window.navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then((stream) => {
-      microphoneStream = new MicrophoneStream() as MicStream;
-      microphoneStream.setStream(stream);
+    window.navigator.mediaDevices
+      .getUserMedia({ video: false, audio: true })
+      .then(async (stream) => {
+        microphoneStream = new MicrophoneStream() as MicStream;
+        microphoneStream.setStream(stream);
 
-      socket = io('https://translate-stream-service-ocrtlpqp4q-uk.a.run.app', {
-        // socket = io('http://localhost:8000', {
-        query: { sourceLang: sourceLanguage, targetLang: targetLanguage },
-        auth: {
-          token: accessToken,
-        },
-      });
+        await fetch('https://translate-stream-service-ocrtlpqp4q-uk.a.run.app');
 
-      socket.on('connect_error', (err) => {
-        console.error(err.message);
-      });
-
-      socket.on('transcriptionData', (data: unknown) => {
-        const transcriptionData = data as TranscriptionData;
-        setTranscription(transcriptionData.results[0].alternatives[0].transcript);
-      });
-
-      socket.on('translationData', (data: unknown) => {
-        setTranslation(data as string);
-      });
-
-      socket.on('disconnect', () => {
-        if (microphoneStream) {
-          microphoneStream.stop();
-          microphoneStream = undefined;
-        }
-        setError(true);
-      });
-
-      microphoneStream &&
-        microphoneStream.on('data', (chunk: Buffer) => {
-          const raw = MicrophoneStream.toRaw(chunk);
-          if (raw == null) {
-            return;
-          }
-          const int16Array = new Int16Array(raw.length);
-          floatTo16BitPCM(raw, int16Array);
-          socket.emit('audioData', int16Array);
+        socket = io('https://translate-stream-service-ocrtlpqp4q-uk.a.run.app', {
+          // socket = io('http://localhost:8000', {
+          query: { sourceLang: sourceLanguage, targetLang: targetLanguage },
+          auth: {
+            token: accessToken,
+          },
         });
-    });
+
+        socket.on('connect_error', (err) => {
+          console.error(err.message);
+        });
+
+        socket.on('transcriptionData', (data: unknown) => {
+          const transcriptionData = data as TranscriptionData;
+          setTranscription(transcriptionData.results[0].alternatives[0].transcript);
+        });
+
+        socket.on('translationData', (data: unknown) => {
+          setTranslation(data as string);
+        });
+
+        socket.on('disconnect', () => {
+          if (microphoneStream) {
+            microphoneStream.stop();
+            microphoneStream = undefined;
+          }
+          setError(true);
+        });
+
+        microphoneStream &&
+          microphoneStream.on('data', (chunk: Buffer) => {
+            const raw = MicrophoneStream.toRaw(chunk);
+            if (raw == null) {
+              return;
+            }
+            const int16Array = new Int16Array(raw.length);
+            floatTo16BitPCM(raw, int16Array);
+            socket.emit('audioData', int16Array);
+          });
+      });
   };
 
   const stopRecording = async () => {
@@ -101,9 +110,11 @@ export const useMicrophoneStream = () => {
       microphoneStream = undefined;
     }
     if (socket && transcription && transcription.trim() !== '') {
-      socket.emit('translate', {
-        transcription,
-      });
+      setTimeout(() => {
+        socket.emit('translate', {
+          transcription: transcriptionRef.current,
+        });
+      }, 1000);
     } else {
       setTimeout(() => {
         socket.emit('emptyTranscription');

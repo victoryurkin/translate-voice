@@ -57,6 +57,7 @@ const TranslateComponent: FC = () => {
   } = useMicrophoneStream();
 
   useEffect(() => {
+    fetch('https://translate-stream-service-ocrtlpqp4q-uk.a.run.app');
     setTimeout(() => {
       setLoaded(true);
     }, 100);
@@ -118,7 +119,9 @@ const TranslateComponent: FC = () => {
 
   const onStopRecording = () => {
     setLoading(true);
-    stopRecording();
+    setTimeout(() => {
+      stopRecording();
+    }, 1000);
   };
 
   useEffect(() => {
