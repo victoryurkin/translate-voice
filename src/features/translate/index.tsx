@@ -144,7 +144,7 @@ const TranslateComponent: FC = () => {
     <>
       <div className={containerClasses}>
         <div className={topBarClasses}>
-          <div className="text-right">
+          <div className="text-right mt-3xl">
             <button
               className="p-md mt-sm mr-sm active:bg-primary-500 rounded-full"
               onClick={() => toggleSettings(true)}>
@@ -152,7 +152,7 @@ const TranslateComponent: FC = () => {
             </button>
           </div>
           <div
-            className="rounded-full overflow-hidden w-16 h-16 -mt-md mx-auto border shadow-lg flex justify-center items-center relative"
+            className="rounded-full overflow-hidden w-16 h-16 -mt-4xl mx-auto border shadow-lg flex justify-center items-center relative"
             onClick={() => setLanguageSelector('top')}>
             <div className="w-24 h-16 absolute">
               <img src={flags[topLanguage.code]} className="h-16" alt={topLanguage.code} />

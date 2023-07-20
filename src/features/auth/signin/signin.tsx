@@ -53,9 +53,11 @@ export const Signin: FC<Props> = ({ onForgotPassword, onSuccess }) => {
   return (
     <div className="flex flex-col justify-center pt-xl">
       <div>
-        <p className="main-header text-center text-4xl mt-3xl text-primary-800">Translate Us</p>
+        <p className="main-header text-center text-4xl mt-3xl text-primary-800">
+          {t('main.title')}
+        </p>
         <p className="main-header text-center text-md mt-md text-secondary-600">
-          speech translation
+          {t('main.subtitle')}
         </p>
       </div>
       {/* <UserIcon className="h-20 fill-primary-600" /> */}

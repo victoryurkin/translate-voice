@@ -7,7 +7,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as authSignOut,
-  // sendEmailVerification,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { notifications, Events } from '@translate-voice/clients';
 
@@ -36,6 +36,7 @@ export interface AuthState {
   signIn: (username: string, password: string) => Promise<void>;
   signUp: (username: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const initialState: AuthState = {
@@ -47,6 +48,9 @@ const initialState: AuthState = {
     console.log('AuthProvider was not setup');
   },
   signOut: async () => {
+    console.log('AuthProvider was not setup');
+  },
+  resetPassword: async () => {
     console.log('AuthProvider was not setup');
   },
 };
@@ -135,15 +139,16 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, auth }) => {
           payload: accessToken,
         });
       }
-      // if (auth.currentUser) {
-      //   await sendEmailVerification(auth.currentUser);
-      // }
     }
   };
 
   const signOut = async () => {
     await authSignOut(auth);
     notifications.dispatch(Events.AUTH_SIGNOUT);
+  };
+
+  const resetPassword = async (email: string) => {
+    await sendPasswordResetEmail(auth, email);
   };
 
   useEffect(() => {
@@ -186,6 +191,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, auth }) => {
       signIn,
       signUp,
       signOut,
+      resetPassword,
     }),
     [authState]
   );

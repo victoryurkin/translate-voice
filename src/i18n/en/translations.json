@@ -1,4 +1,8 @@
 {
+  "main": {
+    "title": "Translate Us",
+    "subtitle": "speech translation"
+  },
   "auth": {
     "email": "Email",
     "password": "Password",
@@ -17,8 +21,12 @@
     "password_error": "Minimum 6 chars, at least 1 number and 1 capital letter",
     "errors": {
       "email_password_not_found": "Email address or password not found",
+      "email_not_found": "Email address not found",
       "email_already_used": "Email address already exists"
-    }
+    },
+    "reset_success_title": "Email Sent",
+    "reset_success_subtitle": "follow the instructions in the email",
+    "reset": "Reset"
   },
   "generic_error": "Something went wrong. Please, try again later.",
   "translate": {

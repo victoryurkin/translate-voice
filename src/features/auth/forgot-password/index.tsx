@@ -2,7 +2,6 @@ import { FC, useState } from 'react';
 import cx from 'classnames';
 import { Email } from './email';
 import { Otp } from './otp';
-import { Password } from './password';
 
 enum VirtualRoutes {
   EMAIL,
@@ -15,7 +14,11 @@ enum Navigation {
   TO_END,
 }
 
-export const ForgotPassword: FC = () => {
+interface Props {
+  onSuccess: () => void;
+}
+
+export const ForgotPassword: FC<Props> = ({ onSuccess }) => {
   const [virtualRoute, setVirtualRoute] = useState<VirtualRoutes>(VirtualRoutes.EMAIL);
   const [navigation, toggleNavigation] = useState<Navigation>();
 
@@ -42,10 +45,7 @@ export const ForgotPassword: FC = () => {
       {virtualRoute === VirtualRoutes.EMAIL && (
         <Email onSubmit={() => navigate(VirtualRoutes.OTP)} />
       )}
-      {virtualRoute === VirtualRoutes.OTP && (
-        <Otp onSubmit={() => navigate(VirtualRoutes.PASSWORD)} />
-      )}
-      {virtualRoute === VirtualRoutes.PASSWORD && <Password />}
+      {virtualRoute === VirtualRoutes.OTP && <Otp onSubmit={onSuccess} />}
     </div>
   );
 };

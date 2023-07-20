@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { useTranslation } from '@translate-voice/i18n';
-import { UserIcon } from '@heroicons/react/24/solid';
-import { Input, Button } from '@translate-voice/components';
+import { KeyIcon } from '@heroicons/react/24/solid';
+import { Button } from '@translate-voice/components';
 
 interface Props {
   onSubmit: () => void;
@@ -12,20 +12,20 @@ export const Otp: FC<Props> = ({ onSubmit }) => {
 
   return (
     <div className="flex flex-col justify-center pt-4xl">
-      <UserIcon className="h-20 fill-primary-600" />
-      <div className="flex justify-center py-3xl px-lg">
+      <KeyIcon className="h-20 fill-primary-600" />
+      <div className="flex justify-center pb-3xl px-lg">
         <form className="flex-1 max-w-xs md:max-w-md">
-          <div className="mb-lg">
-            <Input label={t('auth.otp')} type="text" id="otp" placeholder={t('auth.otp')} />
+          <div className="mb-4xl">
+            <p className="main-header text-center text-3xl mt-3xl text-primary-800">
+              {t('auth.reset_success_title')}
+            </p>
+            <p className="main-header text-center text-md mt-md text-secondary-600">
+              {t('auth.reset_success_subtitle')}
+            </p>
           </div>
           <div className="text-center mb-lg">
             <Button className="w-full" onClick={onSubmit}>
-              {t('auth.confirm_code')}
-            </Button>
-          </div>
-          <div className="text-center">
-            <Button className="w-full" type="link">
-              {t('auth.resend_otp')}
+              {t('auth.signin')}
             </Button>
           </div>
         </form>

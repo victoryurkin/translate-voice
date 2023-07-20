@@ -58,7 +58,7 @@ export const Settings: FC<SettingsProps> = ({ isOpen, onClose }) => {
 
   return (
     <VerticalModal isOpen={isOpen} onClose={onClose}>
-      <div className="p-md pb-4xl h-full flex flex-col">
+      <div className="p-md pb-mega h-full flex flex-col">
         <div className="flex-1">
           <button
             className="p-md active:bg-secondary-200 rounded-full opacity-40"

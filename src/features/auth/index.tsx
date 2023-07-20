@@ -86,7 +86,9 @@ const AuthComponent: FC = () => {
           {virtualRoute === VirtualRoutes.SIGN_UP && (
             <Signup onSuccess={() => navigateToRoute(routes.TRANSLATE.path)} />
           )}
-          {virtualRoute === VirtualRoutes.FORGOT_PASSWORD && <ForgotPassword />}
+          {virtualRoute === VirtualRoutes.FORGOT_PASSWORD && (
+            <ForgotPassword onSuccess={() => navigate(VirtualRoutes.SIGN_IN)} />
+          )}
         </div>
       </div>
       <button

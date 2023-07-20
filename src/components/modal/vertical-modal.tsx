@@ -55,7 +55,7 @@ export const VerticalModal: FC<VerticalModalProps> = ({
 
   const modalClasses = cx(
     `
-      h-full w-10/12 
+      h-full w-10/12 -my-4xl
       bg-white rounded-l-3xl
       overflow-hidden overflow-y-scroll
       absolute right-0
